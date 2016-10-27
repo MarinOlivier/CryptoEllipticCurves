@@ -3,119 +3,154 @@
  */
 package curves;
 
+import com.sun.deploy.util.StringUtils;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
  * @author root
  *
- * p=8884933102832021670310856601112383279507496491807071433260928721853918699951
- * n=8884933102832021670310856601112383279454437918059397120004264665392731659049
- * a4=2481513316835306518496091950488867366805208929993787063131352719741796616329
- * a6=4387305958586347890529260320831286139799795892409507048422786783411496715073
- * r4=5473953786136330929505372885864126123958065998198197694258492204115618878079
- * r6=5831273952509092555776116225688691072512584265972424782073602066621365105518
- * gx=7638166354848741333090176068286311479365713946232310129943505521094105356372
- * gy=762687367051975977761089912701686274060655281117983501949286086861823169994
- * r=8094458595770206542003150089514239385761983350496862878239630488323200271273
- *
- *
  */
 public class Curve {
-	private BigInteger _p;
-	private BigInteger _n;
-	private BigInteger _a4;
-	private BigInteger _a6;
-	private BigInteger _r4;
-	private BigInteger _r6;
-	private BigInteger _gx;
-	private BigInteger _gy;
-	private BigInteger _r;
-	
-	private String _name;
-	
-	public Curve(BigInteger p, BigInteger n, BigInteger a4, BigInteger a6,
-			BigInteger r4, BigInteger r6, BigInteger gx, BigInteger gy,
-			BigInteger r) {
-		
+	private BigDecimal _p;
+	private BigDecimal _n;
+	private BigDecimal _a4;
+	private BigDecimal _a6;
+	private BigDecimal _r4;
+	private BigDecimal _r6;
+	private BigDecimal _gx;
+	private BigDecimal _gy;
+	private BigDecimal _r;
+
+	public Curve(String dir, String filename) {
+        BufferedReader br = null;
+
+        try {
+
+            String sCurrentLine;
+            String sCurrentNumber;
+            br = new BufferedReader(new FileReader("/Users/oliviermarin/Documents/Polytech/Info5/CryptoAv/Curves/elliptic_curves/Weierstrass/"+dir+"/"+filename));
+            int i = 1;
+
+            while ((sCurrentLine = br.readLine()) != null) {
+                System.out.println(sCurrentLine);
+                sCurrentNumber = sCurrentLine.substring(sCurrentLine.lastIndexOf("=")+1);
+                switch (i){
+                    case 1:
+                        _p = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 2:
+                        _n = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 3:
+                        _a4 = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 4:
+                        _a6 = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 5:
+                        _r4 = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 6:
+                        _r6 = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 7:
+                        _gx = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 8:
+                        _gy = new BigDecimal(sCurrentNumber);
+                        break;
+                    case 9:
+                        _r = new BigDecimal(sCurrentNumber);
+                        break;
+                }
+                i++;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null)br.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
 	}
 
-    public BigInteger getP() {
+    public BigDecimal get_p() {
         return _p;
     }
 
-    public void setP(BigInteger p) {
-        _p = p;
+    public void set_p(BigDecimal _p) {
+        this._p = _p;
     }
 
-    public BigInteger getN() {
+    public BigDecimal get_n() {
         return _n;
     }
 
-    public void setN(BigInteger n) {
-        _n = n;
+    public void set_n(BigDecimal _n) {
+        this._n = _n;
     }
 
-    public BigInteger getA4() {
+    public BigDecimal get_a4() {
         return _a4;
     }
 
-    public void setA4(BigInteger a4) {
-        _a4 = a4;
+    public void set_a4(BigDecimal _a4) {
+        this._a4 = _a4;
     }
 
-    public BigInteger getA6() {
+    public BigDecimal get_a6() {
         return _a6;
     }
 
-    public void setA6(BigInteger a6) {
-        _a6 = a6;
+    public void set_a6(BigDecimal _a6) {
+        this._a6 = _a6;
     }
 
-    public BigInteger getR4() {
+    public BigDecimal get_r4() {
         return _r4;
     }
 
-    public void setR4(BigInteger r4) {
-        _r4 = r4;
+    public void set_r4(BigDecimal _r4) {
+        this._r4 = _r4;
     }
 
-    public BigInteger getR6() {
+    public BigDecimal get_r6() {
         return _r6;
     }
 
-    public void setR6(BigInteger r6) {
-        _r6 = r6;
+    public void set_r6(BigDecimal _r6) {
+        this._r6 = _r6;
     }
 
-    public BigInteger getGx() {
+    public BigDecimal get_gx() {
         return _gx;
     }
 
-    public void setGx(BigInteger gx) {
-        _gx = gx;
+    public void set_gx(BigDecimal _gx) {
+        this._gx = _gx;
     }
 
-    public BigInteger getGy() {
+    public BigDecimal get_gy() {
         return _gy;
     }
 
-    public void setGy(BigInteger gy) {
-        _gy = gy;
+    public void set_gy(BigDecimal _gy) {
+        this._gy = _gy;
     }
 
-    public BigInteger getR() {
+    public BigDecimal get_r() {
         return _r;
     }
 
-    public void setR(BigInteger r) {
-        _r = r;
-    }
-
-    public String getName() {
-        return _name;
-    }
-
-    public void setName(String name) {
-        _name = name;
+    public void set_r(BigDecimal _r) {
+        this._r = _r;
     }
 }
