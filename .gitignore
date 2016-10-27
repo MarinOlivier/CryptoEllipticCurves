@@ -16,7 +16,6 @@ local.properties
 
 # Eclipse Core
 .project
-ECC.iml
 
 # External tool builders
 .externalToolBuilders/
