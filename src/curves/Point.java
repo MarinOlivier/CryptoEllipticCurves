@@ -34,8 +34,8 @@ public class Point {
 
     public Point() {
         _curve = null;
-		_x = new BigDecimal(0, MathContext.DECIMAL64);
-		_y = new BigDecimal(0, MathContext.DECIMAL64);
+		_x = new BigDecimal(0, MathContext.UNLIMITED);
+		_y = new BigDecimal(0, MathContext.UNLIMITED);
 		_inf = false;
 	}
 
@@ -43,18 +43,18 @@ public class Point {
         _curve = c;
         String[] tab;
         tab = s.split("\\|");
-        _x = new BigDecimal(tab[0], MathContext.DECIMAL64);
-        _y = new BigDecimal(tab[1], MathContext.DECIMAL64);
+        _x = new BigDecimal(tab[0]);
+        _y = new BigDecimal(tab[1]);
         _inf = Boolean.parseBoolean(tab[2]);
     }
 
     public Point(Curve curve, boolean inf) {
         _curve = curve;
-        _x = new BigDecimal(0, MathContext.DECIMAL64);
+        _x = new BigDecimal(0, MathContext.UNLIMITED);
         if(inf)
-            _y = new BigDecimal(1, MathContext.DECIMAL64);
+            _y = new BigDecimal(1, MathContext.UNLIMITED);
         else
-            _y = new BigDecimal(0, MathContext.DECIMAL64);
+            _y = new BigDecimal(0, MathContext.UNLIMITED);
         this._inf = inf;
     }
 
@@ -65,7 +65,7 @@ public class Point {
     @Override
     public boolean equals(Object obj) {
         Point q = (Point)obj;
-        return (_x.equals(q._x) && _y.equals(_y));
+        return (_x.equals(q._x) && _y.equals(q._y));
     }
 
     public Point opposite() {
@@ -77,13 +77,13 @@ public class Point {
 
 
 	private Point add_distinct(Point q) {
-        BigDecimal bot = _x.add(q._x);
-        BigDecimal l = (_y.add(q._y)).divide(bot, MathContext.DECIMAL64);
+        BigDecimal bot = _x.subtract(q._x);
+        BigDecimal l = (_y.subtract(q._y)).divide(bot, MathContext.DECIMAL128);
 
         Point R = new Point();
         R._curve = _curve;
-        R._x = (l.pow(2)).add(l).add(bot);
-        R._y = (l.add(new BigDecimal(1, MathContext.DECIMAL64))).multiply(R._x).add(l.multiply(_x)).add(_y);
+        R._x = (l.pow(2)).subtract(_x).subtract(q._x);
+        R._y = l.multiply(_x.subtract(R._x)).subtract(_y);
 
         return R;
     }
@@ -102,9 +102,9 @@ public class Point {
 
     public Point doubl() {
 
-        BigDecimal l = _x.add(_y.divide(_x, MathContext.DECIMAL64));
-        BigDecimal xr = l.pow(2).add(l);
-        BigDecimal yr = _x.pow(2).add(l.multiply(xr)).add(xr);
+        BigDecimal l = (new BigDecimal(3, MathContext.UNLIMITED).multiply(_x.pow(2)).add(_curve.getA4())).divide(_y.multiply(new BigDecimal(2, MathContext.UNLIMITED)), MathContext.DECIMAL128);
+        BigDecimal xr = l.pow(2).subtract(_x.multiply(new BigDecimal(2, MathContext.UNLIMITED)));
+        BigDecimal yr = l.multiply(_x.subtract(xr)).subtract(_y);
 
         return new Point(_curve, xr, yr, _inf);
     }
@@ -113,11 +113,11 @@ public class Point {
         String bin = Integer.toBinaryString(k);
         Point q = new Point(_curve, true);
 
-        for(int i=bin.length()-1; i>=0; i--){
-            q.add(q);
+        for(int i=0; i<=bin.length()-1; i++){
             if(bin.charAt(i) == '1'){
                 q = q.add(this);
             }
+            q = q.doubl();
         }
         return q;
     }

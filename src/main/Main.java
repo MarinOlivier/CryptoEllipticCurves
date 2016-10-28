@@ -4,6 +4,7 @@
 package main;
 
 import curves.Curve;
+import curves.Point;
 import gui.ClientGUI;
 import gui.ServerGUI;
 
@@ -22,12 +23,14 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-        C = new Curve("cw512", "w512-001.gp");
-		C.setGx(new BigDecimal(3, MathContext.DECIMAL64));
-		C.setGy(new BigDecimal(4, MathContext.DECIMAL64));
-        ServerGUI serv = new ServerGUI(1337);
-        ClientGUI cli = new ClientGUI("Alice");
-        //ClientGUI cli2 = new ClientGUI();
+        C = new Curve("cw256", "w256-001.gp");
+        //ServerGUI serv = new ServerGUI(1337);
+        //ClientGUI cli = new ClientGUI("Alice");
+
+		Point P = new Point(C, C.getGx(), C.getGy(), false);
+		System.out.println(P.mult(3));
+
+
 	}
 
 }

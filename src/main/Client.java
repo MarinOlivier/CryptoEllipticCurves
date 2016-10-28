@@ -158,7 +158,8 @@ public class Client {
                         }
                     }
                     if(type == ChatMessage.POINT){
-                        cg.DH.setReceivedPoint(new Point(Main.C, msg));
+                        sleep(1000);
+                        cg.DH.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.DH.setSecKey("Alice");
                     }
                 }
@@ -170,6 +171,8 @@ public class Client {
                 }
                 // can't happen with a String object but need the catch anyhow
                 catch(ClassNotFoundException e2) {
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }

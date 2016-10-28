@@ -38,7 +38,7 @@ public class Curve {
             int i = 1;
 
             while ((sCurrentLine = br.readLine()) != null) {
-                System.out.println(sCurrentLine);
+                //System.out.println(sCurrentLine);
                 sCurrentNumber = sCurrentLine.substring(sCurrentLine.lastIndexOf("=")+1);
                 switch (i){
                     case 1:

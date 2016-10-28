@@ -4,6 +4,8 @@ import curves.Point;
 import main.ChatMessage;
 import main.*;
 
+import java.math.BigDecimal;
+
 /**
  * Created by oliviermarin on 27/10/2016.
  */
@@ -17,11 +19,13 @@ public class DiffieHellman {
     public DiffieHellman(Point P, int rand, String s) {
         _rand = rand;
         _P = new Point(P);
+
+        if (s.equals("Alice"))
+            System.out.println("P = " + P.getX());
+
         _calculatedPoint = _P.mult(_rand);
 
-        System.out.println(s + " calcP " + _calculatedPoint);
-
-
+        System.out.println(s + " (" + _rand + " * " + _P.getX() + ")\n Calc -> " + _calculatedPoint.getX());
     }
 
     public boolean sendPointToClient(ClientThread thread){
@@ -36,13 +40,19 @@ public class DiffieHellman {
         return true;
     }
 
-    public void setReceivedPoint(Point receivedPoint) {
+    public void setReceivedPoint(Point receivedPoint, String s) {
         _receivedPoint = receivedPoint;
+
+        System.out.println(s + "\n Recei -> " + _receivedPoint.getX());
     }
 
     public void setSecKey(String s) {
-        System.out.println(s + " receivP " + _receivedPoint);
+        int i = 0;
+        while (i < 10000)
+            i++;
+
         _secKey = _receivedPoint.mult(_rand);
-        System.out.println(s + " _secKey = " + _secKey);
+
+        System.out.println("\n" + s + " (" + _rand + " * " + _receivedPoint.getX() + ")\n Key -> " + _secKey.getX());
     }
 }

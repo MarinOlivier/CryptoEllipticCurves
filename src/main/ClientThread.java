@@ -92,7 +92,12 @@ public class ClientThread extends Thread {
                 case ChatMessage.POINT:
                     _srv.display("Received point is :");
                     _srv.display(message);
-                    DH.setReceivedPoint(new Point(Main.C, message));
+                    try {
+                        sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    DH.setReceivedPoint(new Point(Main.C, message), "Bob");
                     DH.setSecKey("Bob");
                     break;
             }
