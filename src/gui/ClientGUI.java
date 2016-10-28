@@ -1,12 +1,16 @@
 package gui;
 
 import crypto.DiffieHellman;
+import curves.*;
 import main.ChatMessage;
 import main.Client;
+import main.Main;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 
 /**
@@ -35,6 +39,7 @@ public class ClientGUI extends JFrame implements ActionListener{
     private int height = 450;
     private int widht = 400;
     private JButton DHStartBut;
+    public DiffieHellman DH;
 
     // Constructor connection receiving a socket number
     public ClientGUI(String username) {
@@ -119,8 +124,13 @@ public class ClientGUI extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
         if(o == DHStartBut) {
-            System.out.println("ClientGUI.actionPerformed" + " DH Start");
-            DiffieHellman DH = new DiffieHellman();
+            client.sendMessage(new ChatMessage(ChatMessage.STARTDH, ""));
+            ta.append("Start DH exchange keys with :\n");
+            ta.append("gx = " + Main.C.getGx() +"\n");
+            ta.append("gy = " + Main.C.getGy() +"\n");
+
+            DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), 4567, "Alice");
+            DH.sendPointToServ(client);
             return;
         }
         if (connected) {

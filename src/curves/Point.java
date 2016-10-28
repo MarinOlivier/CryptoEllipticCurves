@@ -2,6 +2,8 @@
  * 
  */
 package curves;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 
@@ -23,12 +25,28 @@ public class Point {
 		_inf = inf;
 	}
 
+	public Point(Point P) {
+        _curve = P.getCurve();
+        _x = P.getX();
+        _y = P.getY();
+        _inf = P.isInf();
+    }
+
     public Point() {
         _curve = null;
 		_x = new BigDecimal(0, MathContext.DECIMAL64);
 		_y = new BigDecimal(0, MathContext.DECIMAL64);
 		_inf = false;
 	}
+
+	public Point(Curve c, String s) {
+        _curve = c;
+        String[] tab;
+        tab = s.split("\\|");
+        _x = new BigDecimal(tab[0], MathContext.DECIMAL64);
+        _y = new BigDecimal(tab[1], MathContext.DECIMAL64);
+        _inf = Boolean.parseBoolean(tab[2]);
+    }
 
     public Point(Curve curve, boolean inf) {
         _curve = curve;
@@ -102,6 +120,22 @@ public class Point {
             }
         }
         return q;
+    }
+
+    public Curve getCurve() {
+        return _curve;
+    }
+
+    public BigDecimal getX() {
+        return _x;
+    }
+
+    public BigDecimal getY() {
+        return _y;
+    }
+
+    public boolean isInf() {
+        return _inf;
     }
 
     @Override

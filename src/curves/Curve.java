@@ -33,7 +33,8 @@ public class Curve {
 
             String sCurrentLine;
             String sCurrentNumber;
-            br = new BufferedReader(new FileReader("/Users/oliviermarin/Documents/Polytech/Info5/CryptoAv/Curves/elliptic_curves/Weierstrass/"+dir+"/"+filename));
+            //br = new BufferedReader(new FileReader("/Users/oliviermarin/Documents/Polytech/Info5/CryptoAv/Curves/elliptic_curves/Weierstrass/"+dir+"/"+filename));
+            br = new BufferedReader(new FileReader("D:\\Documents\\Polytech\\info5\\cryptoAv\\Curves\\elliptic_curves\\Weierstrass\\"+dir+"\\"+filename));
             int i = 1;
 
             while ((sCurrentLine = br.readLine()) != null) {
@@ -82,75 +83,75 @@ public class Curve {
         }
 	}
 
-    public BigDecimal get_p() {
+    public BigDecimal getP() {
         return _p;
     }
 
-    public void set_p(BigDecimal _p) {
-        this._p = _p;
+    public void setP(BigDecimal p) {
+        _p = p;
     }
 
-    public BigDecimal get_n() {
+    public BigDecimal getN() {
         return _n;
     }
 
-    public void set_n(BigDecimal _n) {
-        this._n = _n;
+    public void setN(BigDecimal n) {
+        _n = n;
     }
 
-    public BigDecimal get_a4() {
+    public BigDecimal getA4() {
         return _a4;
     }
 
-    public void set_a4(BigDecimal _a4) {
-        this._a4 = _a4;
+    public void setA4(BigDecimal a4) {
+        _a4 = a4;
     }
 
-    public BigDecimal get_a6() {
+    public BigDecimal getA6() {
         return _a6;
     }
 
-    public void set_a6(BigDecimal _a6) {
-        this._a6 = _a6;
+    public void setA6(BigDecimal a6) {
+        _a6 = a6;
     }
 
-    public BigDecimal get_r4() {
+    public BigDecimal getR4() {
         return _r4;
     }
 
-    public void set_r4(BigDecimal _r4) {
-        this._r4 = _r4;
+    public void setR4(BigDecimal r4) {
+        _r4 = r4;
     }
 
-    public BigDecimal get_r6() {
+    public BigDecimal getR6() {
         return _r6;
     }
 
-    public void set_r6(BigDecimal _r6) {
-        this._r6 = _r6;
+    public void setR6(BigDecimal r6) {
+        _r6 = r6;
     }
 
-    public BigDecimal get_gx() {
+    public BigDecimal getGx() {
         return _gx;
     }
 
-    public void set_gx(BigDecimal _gx) {
-        this._gx = _gx;
+    public void setGx(BigDecimal gx) {
+        _gx = gx;
     }
 
-    public BigDecimal get_gy() {
+    public BigDecimal getGy() {
         return _gy;
     }
 
-    public void set_gy(BigDecimal _gy) {
-        this._gy = _gy;
+    public void setGy(BigDecimal gy) {
+        _gy = gy;
     }
 
-    public BigDecimal get_r() {
+    public BigDecimal getR() {
         return _r;
     }
 
-    public void set_r(BigDecimal _r) {
-        this._r = _r;
+    public void setR(BigDecimal r) {
+        _r = r;
     }
 }

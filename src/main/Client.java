@@ -1,5 +1,6 @@
 package main;
 
+import curves.Point;
 import gui.ClientGUI;
 
 import java.net.*;
@@ -144,14 +145,21 @@ public class Client {
         public void run() {
             while(true) {
                 try {
-                    String msg = (String) sInput.readObject();
-                    // if console mode print the message and add back the prompt
-                    if(cg == null) {
-                        System.out.println(msg);
-                        System.out.print("> ");
+                    ChatMessage chtMsg = (ChatMessage) sInput.readObject();
+                    int type = chtMsg.getType();
+                    String msg = chtMsg.getMessage();
+                    if(type == ChatMessage.MESSAGE) {
+                        // if console mode print the message and add back the prompt
+                        if (cg == null) {
+                            System.out.println(msg);
+                            System.out.print("> ");
+                        } else {
+                            cg.append(msg);
+                        }
                     }
-                    else {
-                        cg.append(msg);
+                    if(type == ChatMessage.POINT){
+                        cg.DH.setReceivedPoint(new Point(Main.C, msg));
+                        cg.DH.setSecKey("Alice");
                     }
                 }
                 catch(IOException e) {
