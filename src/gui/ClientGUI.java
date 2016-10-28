@@ -1,5 +1,6 @@
 package gui;
 
+import crypto.DiffieHellman;
 import main.ChatMessage;
 import main.Client;
 
@@ -30,9 +31,14 @@ public class ClientGUI extends JFrame implements ActionListener{
     private String defaultHost;
     private String username;
 
+    private int inputHeight = 75;
+    private int height = 450;
+    private int widht = 400;
+    private JButton DHStartBut;
+
     // Constructor connection receiving a socket number
     public ClientGUI(String username) {
-        super("Chat Client");
+        super("Chat Client " + username);
 
         this.username = username;
         defaultPort = 1337;
@@ -45,9 +51,18 @@ public class ClientGUI extends JFrame implements ActionListener{
         // The CenterPanel which is the chat room
         ta = new JTextArea("Welcome to the Chat room\n");
 
+        JPanel northPane = new JPanel(new GridLayout(1, 3));
+        DHStartBut = new JButton("Start DH");
+
+        DHStartBut.addActionListener(this);
+
+        northPane.add(DHStartBut);
+        add(northPane, BorderLayout.NORTH);
+
         JPanel centerPanel = new JPanel(new GridLayout(1,1));
         centerPanel.add(new JScrollPane(ta));
         ta.setEditable(false);
+        centerPanel.setSize(widht, height-inputHeight);
         add(centerPanel, BorderLayout.CENTER);
 
         JPanel southPanel = new JPanel();
@@ -56,10 +71,13 @@ public class ClientGUI extends JFrame implements ActionListener{
         southPanel.setLayout(new BorderLayout());
         southPanel.add(input, BorderLayout.CENTER);
         southPanel.add(sendBut, BorderLayout.EAST);
+
+        southPanel.setSize(widht, inputHeight);
+
         add(southPanel, BorderLayout.SOUTH);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(400, 450);
+        setSize(widht, height);
         setVisible(true);
         input.requestFocus();
 
@@ -99,6 +117,12 @@ public class ClientGUI extends JFrame implements ActionListener{
     *
     */
     public void actionPerformed(ActionEvent e) {
+        Object o = e.getSource();
+        if(o == DHStartBut) {
+            System.out.println("ClientGUI.actionPerformed" + " DH Start");
+            DiffieHellman DH = new DiffieHellman();
+            return;
+        }
         if (connected) {
             client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
             input.setText("");
