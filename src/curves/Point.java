@@ -4,7 +4,7 @@
 package curves;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 
 
@@ -14,11 +14,11 @@ import java.math.MathContext;
  */
 public class Point {
     private Curve _curve;
-	private BigDecimal _x;
-	private BigDecimal _y;
+	private BigInteger _x;
+	private BigInteger _y;
 	private boolean _inf; // true => is infinite point
 	
-    public Point(Curve curve, BigDecimal x, BigDecimal y, boolean inf){
+    public Point(Curve curve, BigInteger x, BigInteger y, boolean inf){
 		_curve = curve;
         _x = x;
 		_y = y;
@@ -34,8 +34,8 @@ public class Point {
 
     public Point() {
         _curve = null;
-		_x = new BigDecimal(0, MathContext.UNLIMITED);
-		_y = new BigDecimal(0, MathContext.UNLIMITED);
+		_x = new BigInteger("0");
+		_y = new BigInteger("0");
 		_inf = false;
 	}
 
@@ -43,18 +43,18 @@ public class Point {
         _curve = c;
         String[] tab;
         tab = s.split("\\|");
-        _x = new BigDecimal(tab[0]);
-        _y = new BigDecimal(tab[1]);
+        _x = new BigInteger(tab[0]);
+        _y = new BigInteger(tab[1]);
         _inf = Boolean.parseBoolean(tab[2]);
     }
 
     public Point(Curve curve, boolean inf) {
         _curve = curve;
-        _x = new BigDecimal(0, MathContext.UNLIMITED);
+        _x = new BigInteger("0");
         if(inf)
-            _y = new BigDecimal(1, MathContext.UNLIMITED);
+            _y = new BigInteger("1");
         else
-            _y = new BigDecimal(0, MathContext.UNLIMITED);
+            _y = new BigInteger("0");
         this._inf = inf;
     }
 
@@ -77,13 +77,13 @@ public class Point {
 
 
 	private Point add_distinct(Point q) {
-        BigDecimal bot = _x.subtract(q._x);
-        BigDecimal l = (_y.subtract(q._y)).divide(bot, MathContext.DECIMAL128);
+        BigInteger bot = _x.subtract(q._x).mod(_curve.getP());
+        BigInteger l = ((_y.subtract(q._y)).divide(bot)).mod(_curve.getP());
 
         Point R = new Point();
         R._curve = _curve;
-        R._x = (l.pow(2)).subtract(_x).subtract(q._x);
-        R._y = l.multiply(_x.subtract(R._x)).subtract(_y);
+        R._x = ((l.pow(2)).subtract(_x).subtract(q._x)).mod(_curve.getP());
+        R._y = (l.multiply(_x.subtract(R._x)).subtract(_y)).mod(_curve.getP());
 
         return R;
     }
@@ -102,11 +102,12 @@ public class Point {
 
     public Point doubl() {
 
-        BigDecimal l = (new BigDecimal(3, MathContext.UNLIMITED).multiply(_x.pow(2)).add(_curve.getA4())).divide(_y.multiply(new BigDecimal(2, MathContext.UNLIMITED)), MathContext.DECIMAL128);
-        BigDecimal xr = l.pow(2).subtract(_x.multiply(new BigDecimal(2, MathContext.UNLIMITED)));
-        BigDecimal yr = l.multiply(_x.subtract(xr)).subtract(_y);
+        BigInteger l = ((new BigInteger("3").multiply(_x.pow(2))).add(_curve.getA4())).multiply((_y.multiply(new BigInteger("2"))).modInverse(_curve.getP()));
+        l = l.mod(_curve.getP());
+        BigInteger xr = l.pow(2).subtract(_x.multiply(new BigInteger("2")));
+        BigInteger yr = l.multiply(_x.subtract(xr)).subtract(_y);
 
-        return new Point(_curve, xr, yr, _inf);
+        return new Point(_curve, xr.mod(_curve.getP()), yr.mod(_curve.getP()), _inf);
     }
 
     public Point mult(int k){
@@ -114,10 +115,10 @@ public class Point {
         Point q = new Point(_curve, true);
 
         for(int i=0; i<=bin.length()-1; i++){
+            q = q.doubl();
             if(bin.charAt(i) == '1'){
                 q = q.add(this);
             }
-            q = q.doubl();
         }
         return q;
     }
@@ -126,11 +127,11 @@ public class Point {
         return _curve;
     }
 
-    public BigDecimal getX() {
+    public BigInteger getX() {
         return _x;
     }
 
-    public BigDecimal getY() {
+    public BigInteger getY() {
         return _y;
     }
 

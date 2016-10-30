@@ -8,7 +8,7 @@ import curves.Point;
 import gui.ClientGUI;
 import gui.ServerGUI;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 
 /**
@@ -24,13 +24,12 @@ public class Main {
 	 */
 	public static void main(String[] args) {
         C = new Curve("cw256", "w256-001.gp");
-        //ServerGUI serv = new ServerGUI(1337);
-        //ClientGUI cli = new ClientGUI("Alice");
+        ServerGUI serv = new ServerGUI(1337);
+        ClientGUI cli = new ClientGUI("Alice");
 
-		Point P = new Point(C, C.getGx(), C.getGy(), false);
-		System.out.println(P.mult(3));
-
-
+		//Point P = new Point(C, C.getGx(), C.getGy(), false);
+		//System.out.println(P.mult(2));
+		//System.out.println(P.add(P));
 	}
 
 }

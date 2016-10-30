@@ -9,7 +9,7 @@ import main.Main;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.BigInteger;
 
 

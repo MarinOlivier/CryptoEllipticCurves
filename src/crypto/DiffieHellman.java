@@ -4,7 +4,7 @@ import curves.Point;
 import main.ChatMessage;
 import main.*;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Created by oliviermarin on 27/10/2016.
@@ -29,13 +29,13 @@ public class DiffieHellman {
     }
 
     public boolean sendPointToClient(ClientThread thread){
-        String point = _calculatedPoint.getX().toPlainString()+"|"+_calculatedPoint.getY().toPlainString()+"|"+_calculatedPoint.isInf();
+        String point = _calculatedPoint.getX().toString()+"|"+_calculatedPoint.getY().toString()+"|"+_calculatedPoint.isInf();
         thread.writeMsg(new ChatMessage(ChatMessage.POINT, point));
         return true;
     }
 
     public boolean sendPointToServ(Client client) {
-        String point = _calculatedPoint.getX().toPlainString()+"|"+_calculatedPoint.getY().toPlainString()+"|"+_calculatedPoint.isInf();
+        String point = _calculatedPoint.getX().toString()+"|"+_calculatedPoint.getY().toString()+"|"+_calculatedPoint.isInf();
         client.sendMessage(new ChatMessage(ChatMessage.POINT, point));
         return true;
     }
