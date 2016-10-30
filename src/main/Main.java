@@ -28,8 +28,9 @@ public class Main {
         ClientGUI cli = new ClientGUI("Alice");
 
 		//Point P = new Point(C, C.getGx(), C.getGy(), false);
-		//System.out.println(P.mult(2));
-		//System.out.println(P.add(P));
+		//System.out.println("1234 * " + C.getGx() );
+		//System.out.println(P.mult(1234));
+
 	}
 
 }

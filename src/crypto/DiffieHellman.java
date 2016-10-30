@@ -42,17 +42,15 @@ public class DiffieHellman {
 
     public void setReceivedPoint(Point receivedPoint, String s) {
         _receivedPoint = receivedPoint;
-
         System.out.println(s + "\n Recei -> " + _receivedPoint.getX());
     }
 
     public void setSecKey(String s) {
-        int i = 0;
-        while (i < 10000)
-            i++;
-
         _secKey = _receivedPoint.mult(_rand);
-
         System.out.println("\n" + s + " (" + _rand + " * " + _receivedPoint.getX() + ")\n Key -> " + _secKey.getX());
+    }
+
+    public Point getSecKey() {
+        return _secKey;
     }
 }

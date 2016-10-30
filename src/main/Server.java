@@ -127,11 +127,6 @@ public class Server {
         // add HH:mm:ss and \n to the message
         String time = sdf.format(new Date());
         String messageLf = time + " " + message + "\n";
-        // display message on console or GUI
-        if(sg == null)
-            System.out.print(messageLf);
-        else
-            sg.appendRoom(messageLf);     // append in the room window
 
         // we loop in reverse order in case we would have to remove a Client
         // because it has disconnected

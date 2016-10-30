@@ -78,7 +78,9 @@ public class Point {
 
 	private Point add_distinct(Point q) {
         BigInteger bot = _x.subtract(q._x).mod(_curve.getP());
-        BigInteger l = ((_y.subtract(q._y)).divide(bot)).mod(_curve.getP());
+        BigInteger l = (_y.subtract(q._y)).multiply((bot).modInverse(_curve.getP()));
+
+        l = l.mod(_curve.getP());
 
         Point R = new Point();
         R._curve = _curve;
@@ -110,6 +112,19 @@ public class Point {
         return new Point(_curve, xr.mod(_curve.getP()), yr.mod(_curve.getP()), _inf);
     }
 
+    public Point mult(BigInteger k) {
+        String bin = k.toString(2);
+        Point q = new Point(_curve, true);
+
+        for(int i=0; i<=bin.length()-1; i++){
+            q = q.doubl();
+            if(bin.charAt(i) == '1'){
+                q = q.add(this);
+            }
+        }
+        return q;
+    }
+
     public Point mult(int k){
         String bin = Integer.toBinaryString(k);
         Point q = new Point(_curve, true);
@@ -138,6 +153,8 @@ public class Point {
     public boolean isInf() {
         return _inf;
     }
+
+
 
     @Override
     public String toString() {

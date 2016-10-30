@@ -5,6 +5,7 @@ package main;
  */
 
 import crypto.DiffieHellman;
+import crypto.ElGamal;
 import curves.Point;
 
 import java.io.IOException;
@@ -28,7 +29,8 @@ public class ClientThread extends Thread {
     // the date I connect
     String date;
     Server _srv;
-    public DiffieHellman DH;
+    private DiffieHellman DH;
+    private ElGamal EG;
 
     public ClientThread(Server srv, Socket socket) {
         _srv = srv;
@@ -80,7 +82,7 @@ public class ClientThread extends Thread {
             switch(cm.getType()) {
 
                 case ChatMessage.MESSAGE:
-                    _srv.broadcast(username + ": " + message);
+                    _srv.display(username + ": here" + message);
                     break;
                 case ChatMessage.STARTDH:
                     _srv.display("Start DH exchange keys with :");
@@ -99,6 +101,24 @@ public class ClientThread extends Thread {
                     }
                     DH.setReceivedPoint(new Point(Main.C, message), "Bob");
                     DH.setSecKey("Bob");
+                    _srv.display("Secret key is : " + DH.getSecKey());
+                    break;
+                case ChatMessage.STARTEG:
+                    _srv.display("Start EG :");
+                    EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
+                    EG.sendPubKToClient(this);
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case ChatMessage.EGPUBK:
+                    EG.setReceivedPoint(new Point(Main.C, message), "Bob");
+                    break;
+                case ChatMessage.MSG_EG:
+                    _srv.display("receive MSG_EG");
+                    _srv.display(EG.uncipher(message));
                     break;
             }
         }

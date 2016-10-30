@@ -158,9 +158,15 @@ public class Client {
                         }
                     }
                     if(type == ChatMessage.POINT){
-                        sleep(1000);
+                        sleep(500);
                         cg.DH.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.DH.setSecKey("Alice");
+                        cg.append("Secret key : " + cg.DH.getSecKey() + "\n");
+                    }
+                    if(type == ChatMessage.EGPUBK){
+                        sleep(500);
+                        cg.EG.setReceivedPoint(new Point(Main.C, msg), "Alice");
+                        cg.inEG = true;
                     }
                 }
                 catch(IOException e) {

@@ -15,7 +15,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
     // the stop and start buttons
     private JButton stopStart;
     // JTextArea for the chat room and the events
-    private JTextArea chat, event;
+    private JTextArea event;
     // The port number
     private JTextField tPortNumber;
     // my server
@@ -27,18 +27,10 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         super("Chat Server");
         server = null;
 
-        setLayout(new BorderLayout());
-        // the event and chat room
-        chat = new JTextArea();
-        chat.setEditable(false);
-        appendRoom("Chat room.\n");
-        add(chat, BorderLayout.CENTER);
-
-        JPanel eventPane = new JPanel();
         event = new JTextArea();
         event.setEditable(false);
         appendEvent("Events log.\n");
-        add(event, BorderLayout.SOUTH);
+        add(event);
 
         // need to be informed when the user click the close button on the frame
         addWindowListener(this);
@@ -51,16 +43,8 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         new ServerRunning().start();
     }
 
-    // append message to the two JTextArea
-    // position at the end
-    public void appendRoom(String str) {
-        chat.append(str);
-        chat.setCaretPosition(chat.getText().length() - 1);
-    }
     public void appendEvent(String str) {
         event.append(str);
-        event.setCaretPosition(chat.getText().length() - 1);
-
     }
 
     // start or stop where clicked

@@ -1,16 +1,21 @@
 package gui;
 
 import crypto.DiffieHellman;
+import crypto.ElGamal;
 import curves.*;
+import curves.Point;
 import main.ChatMessage;
 import main.Client;
 import main.Main;
+import math.MathBigInt;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.math.BigInteger;
 import java.math.BigInteger;
+
+import static java.lang.Thread.sleep;
 
 
 /**
@@ -39,7 +44,10 @@ public class ClientGUI extends JFrame implements ActionListener{
     private int height = 450;
     private int widht = 400;
     private JButton DHStartBut;
+    private JButton EGStartBut;
     public DiffieHellman DH;
+    public ElGamal EG;
+    public boolean inEG;
 
     // Constructor connection receiving a socket number
     public ClientGUI(String username) {
@@ -48,6 +56,7 @@ public class ClientGUI extends JFrame implements ActionListener{
         this.username = username;
         defaultPort = 1337;
         defaultHost = "localhost";
+        inEG = false;
 
         input = new JTextArea();
 
@@ -58,10 +67,13 @@ public class ClientGUI extends JFrame implements ActionListener{
 
         JPanel northPane = new JPanel(new GridLayout(1, 3));
         DHStartBut = new JButton("Start DH");
+        EGStartBut = new JButton("Start EG");
 
         DHStartBut.addActionListener(this);
+        EGStartBut.addActionListener(this);
 
         northPane.add(DHStartBut);
+        northPane.add(EGStartBut);
         add(northPane, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(1,1));
@@ -129,12 +141,32 @@ public class ClientGUI extends JFrame implements ActionListener{
             ta.append("gx = " + Main.C.getGx() +"\n");
             ta.append("gy = " + Main.C.getGy() +"\n");
 
-            DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), 4567, "Alice");
+            DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), 4567, "Alice");
             DH.sendPointToServ(client);
+            return;
+        }
+        if(o == EGStartBut && !inEG) {
+            client.sendMessage(new ChatMessage(ChatMessage.STARTEG, ""));
+            ta.append("Start EG :\n");
+
+            EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Alice");
+
+            try {
+                sleep(500);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
+            EGStartBut.setText("Stop EG");
+            return;
+        }
+        if (inEG){
+            client.sendMessage(new ChatMessage(ChatMessage.MSG_EG, EG.cipher(input.getText())));
+            input.setText("");
             return;
         }
         if (connected) {
             client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
+            append(input.getText() + "\n");
             input.setText("");
         }
     }
