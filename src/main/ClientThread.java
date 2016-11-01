@@ -104,7 +104,7 @@ public class ClientThread extends Thread {
                     _srv.display("Secret key is : " + DH.getSecKey());
                     break;
                 case ChatMessage.STARTEG:
-                    _srv.display("Start EG :");
+                    _srv.display("Start EG.");
                     EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
                     EG.sendPubKToClient(this);
                     try {
@@ -119,6 +119,9 @@ public class ClientThread extends Thread {
                 case ChatMessage.MSG_EG:
                     _srv.display("receive MSG_EG");
                     _srv.display(EG.uncipher(message));
+                    break;
+                case ChatMessage.STOPEG:
+                    _srv.display("Stop EG.");
                     break;
             }
         }

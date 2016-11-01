@@ -28,18 +28,19 @@ public class ElGamal {
         System.out.println(s + "\n Pub key -> " + _pubK.getX());
     }
 
-    public Point F(String m) {
+    private Point F(String m) {
         System.out.println("Message = " + m);
         BigInteger x = toBigInteger(m);
         System.out.println("Message BigInt " + x);
         BigInteger y;
         y = (x.pow(3).add(_c.getA4().multiply(x)).add(_c.getA6())).mod(_c.getP());
+        System.out.println("y2 = " + y);
         y = sqrtP(y, _c.getP());
-
+        System.out.println("y = " + y);
         return new Point(_c, x, y, false);
     }
 
-    public String invF(Point p) {
+    private String invF(Point p) {
         System.out.println("Message BigInt received " + p.getX());
         return fromBigInteger(p.getX());
     }

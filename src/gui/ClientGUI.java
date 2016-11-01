@@ -147,7 +147,7 @@ public class ClientGUI extends JFrame implements ActionListener{
         }
         if(o == EGStartBut && !inEG) {
             client.sendMessage(new ChatMessage(ChatMessage.STARTEG, ""));
-            ta.append("Start EG :\n");
+            ta.append("Start EG.\n");
 
             EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Alice");
 
@@ -157,6 +157,16 @@ public class ClientGUI extends JFrame implements ActionListener{
                 e1.printStackTrace();
             }
             EGStartBut.setText("Stop EG");
+            DHStartBut.setEnabled(false);
+            return;
+        }
+        if(o == EGStartBut && inEG) {
+            client.sendMessage(new ChatMessage(ChatMessage.STOPEG, ""));
+            ta.append("Stop EG.\n");
+
+            inEG = false;
+            EGStartBut.setText("Start EG");
+            DHStartBut.setEnabled(true);
             return;
         }
         if (inEG){
