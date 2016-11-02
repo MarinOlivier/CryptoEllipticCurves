@@ -97,7 +97,7 @@ public class Client {
         if(cg == null)
             System.out.println(msg);      // println in console mode
         else
-            cg.append(msg + "\n");		// append to the ClientGUI JTextArea (or whatever)
+            cg.append(msg + "\n", "");		// append to the ClientGUI JTextArea (or whatever)
     }
 
     /*
@@ -154,19 +154,23 @@ public class Client {
                             System.out.println(msg);
                             System.out.print("> ");
                         } else {
-                            cg.append(msg);
+                            cg.append(msg, "");
                         }
                     }
                     if(type == ChatMessage.POINT){
                         sleep(500);
                         cg.DH.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.DH.setSecKey("Alice");
-                        cg.append("Secret key : " + cg.DH.getSecKey() + "\n");
+                        cg.append("Secret key : " + cg.DH.getSecKey() + "\n", "");
                     }
                     if(type == ChatMessage.EGPUBK){
                         sleep(500);
                         cg.EG.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.inEG = true;
+                        cg.sendBut.setEnabled(true);
+                    }
+                    if(type == ChatMessage.MSG_EG){
+                        cg.append(cg.EG.uncipher(msg), "Bob : ");
                     }
                 }
                 catch(IOException e) {

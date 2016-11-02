@@ -31,9 +31,11 @@ public class ClientThread extends Thread {
     Server _srv;
     private DiffieHellman DH;
     private ElGamal EG;
+    private boolean inEG;
 
     public ClientThread(Server srv, Socket socket) {
         _srv = srv;
+        inEG = false;
         // a unique id
         id = ++_srv.uniqueId;
         this.socket = socket;
@@ -82,7 +84,7 @@ public class ClientThread extends Thread {
             switch(cm.getType()) {
 
                 case ChatMessage.MESSAGE:
-                    _srv.display(username + ": here" + message);
+                    _srv.display(username + " : " + message);
                     break;
                 case ChatMessage.STARTDH:
                     _srv.display("Start DH exchange keys with :");
@@ -92,8 +94,6 @@ public class ClientThread extends Thread {
                     DH.sendPointToClient(this);
                     break;
                 case ChatMessage.POINT:
-                    _srv.display("Received point is :");
-                    _srv.display(message);
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {
@@ -104,20 +104,19 @@ public class ClientThread extends Thread {
                     _srv.display("Secret key is : " + DH.getSecKey());
                     break;
                 case ChatMessage.STARTEG:
-                    _srv.display("Start EG.");
-                    EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
-                    EG.sendPubKToClient(this);
-                    try {
-                        sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if(message.equals("INIT")){
+                        _srv.display("Start EG.");
+                        _srv.setEnableSendBut(false);
+                        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
+                        EG.sendPubKToClient(this);
                     }
                     break;
                 case ChatMessage.EGPUBK:
                     EG.setReceivedPoint(new Point(Main.C, message), "Bob");
+                    inEG = true;
+                    _srv.setEnableSendBut(true);
                     break;
                 case ChatMessage.MSG_EG:
-                    _srv.display("receive MSG_EG");
                     _srv.display(EG.uncipher(message));
                     break;
                 case ChatMessage.STOPEG:

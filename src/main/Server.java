@@ -153,4 +153,8 @@ public class Server {
         }
     }
 
+    public void setEnableSendBut(boolean b){
+        sg.sendBut.setEnabled(b);
+    }
+
 }

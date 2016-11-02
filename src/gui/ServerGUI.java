@@ -20,6 +20,8 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
     private JTextField tPortNumber;
     // my server
     private Server server;
+    private JTextArea input;
+    public JButton sendBut;
 
 
     // server constructor that receive the port to listen to for connection as parameter
@@ -27,10 +29,34 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         super("Chat Server Bob");
         server = null;
 
+        setLayout(new BorderLayout());
         event = new JTextArea();
         event.setEditable(false);
         appendEvent("Events log.\n");
-        add(event);
+
+        JPanel centerPanel = new JPanel(new GridLayout(1,1));
+        centerPanel.add(new JScrollPane(event));
+        add(centerPanel, BorderLayout.CENTER);
+
+        input = new JTextArea();
+
+        sendBut = new JButton("Send");
+
+        JPanel southPanel = new JPanel();
+
+        sendBut.addActionListener(this);
+
+        southPanel.setBackground(Color.WHITE);
+        southPanel.setLayout(new BorderLayout());
+        southPanel.add(input, BorderLayout.CENTER);
+        southPanel.add(sendBut, BorderLayout.EAST);
+
+        int inputHeight = 75;
+        int widht = 400;
+
+        southPanel.setSize(widht, inputHeight);
+
+        add(southPanel, BorderLayout.SOUTH);
 
         // need to be informed when the user click the close button on the frame
         addWindowListener(this);
@@ -49,6 +75,14 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
 
     // start or stop where clicked
     public void actionPerformed(ActionEvent e) {
+        Object o = e.getSource();
+        System.out.println("o = " + o);
+        if(o == sendBut){
+            server.broadcast("Bob : " + input.getText());
+            server.display("Bob : " + input.getText());
+            input.setText("");
+            return;
+        }
         // if running we have to stop
         if(server != null) {
             server.stop();

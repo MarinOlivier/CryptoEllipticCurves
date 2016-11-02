@@ -30,7 +30,7 @@ public class ClientGUI extends JFrame implements ActionListener{
 
     // for the chat room
     private JTextArea ta;
-    private JButton sendBut;
+    public JButton sendBut;
     // if it is for connection
     private boolean connected;
     // the Client object
@@ -40,9 +40,6 @@ public class ClientGUI extends JFrame implements ActionListener{
     private String defaultHost;
     private String username;
 
-    private int inputHeight = 75;
-    private int height = 450;
-    private int widht = 400;
     private JButton DHStartBut;
     private JButton EGStartBut;
     public DiffieHellman DH;
@@ -79,7 +76,10 @@ public class ClientGUI extends JFrame implements ActionListener{
         JPanel centerPanel = new JPanel(new GridLayout(1,1));
         centerPanel.add(new JScrollPane(ta));
         ta.setEditable(false);
-        centerPanel.setSize(widht, height-inputHeight);
+        int inputHeight = 75;
+        int height = 450;
+        int widht = 400;
+        centerPanel.setSize(widht, height - inputHeight);
         add(centerPanel, BorderLayout.CENTER);
 
         JPanel southPanel = new JPanel();
@@ -102,8 +102,8 @@ public class ClientGUI extends JFrame implements ActionListener{
     }
 
     // called by the Client to append text in the TextArea
-    public void append(String str) {
-        ta.append(str);
+    public void append(String str, String name) {
+        ta.append(name + str);
         ta.setCaretPosition(ta.getText().length() - 1);
     }
     // called by the GUI is the connection failed
@@ -146,18 +146,15 @@ public class ClientGUI extends JFrame implements ActionListener{
             return;
         }
         if(o == EGStartBut && !inEG) {
-            client.sendMessage(new ChatMessage(ChatMessage.STARTEG, ""));
+            client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "INIT"));
             ta.append("Start EG.\n");
 
             EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Alice");
+            EG.sendPubKToServ(client);
 
-            try {
-                sleep(500);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
-            }
             EGStartBut.setText("Stop EG");
             DHStartBut.setEnabled(false);
+            sendBut.setEnabled(false);
             return;
         }
         if(o == EGStartBut && inEG) {
@@ -171,12 +168,13 @@ public class ClientGUI extends JFrame implements ActionListener{
         }
         if (inEG){
             client.sendMessage(new ChatMessage(ChatMessage.MSG_EG, EG.cipher(input.getText())));
+            append(input.getText() + "\n", "Alice : ");
             input.setText("");
             return;
         }
         if (connected) {
             client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
-            append(input.getText() + "\n");
+            append(input.getText() + "\n", "Alice : ");
             input.setText("");
         }
     }

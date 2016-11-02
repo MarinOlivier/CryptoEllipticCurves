@@ -51,6 +51,12 @@ public class ElGamal {
         return true;
     }
 
+    public boolean sendPubKToServ(Client client) {
+        String point = _pubK.getX().toString()+"|"+_pubK.getY().toString()+"|"+_pubK.isInf();
+        client.sendMessage(new ChatMessage(ChatMessage.EGPUBK, point));
+        return true;
+    }
+
     public void setReceivedPoint(Point receivedPoint, String s) {
         otherPubKey = receivedPoint;
         System.out.println(s + "\n Recei -> " + otherPubKey.getX());
