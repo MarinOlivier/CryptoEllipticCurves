@@ -4,6 +4,9 @@ import curves.Point;
 import main.ChatMessage;
 import main.*;
 
+import static main.Main.C;
+import static math.MathBigInt.*;
+
 import java.math.BigInteger;
 
 /**
@@ -11,13 +14,13 @@ import java.math.BigInteger;
  */
 public class DiffieHellman {
     private Point _P;
-    private int _rand;
+    private BigInteger _rand;
     private Point _calculatedPoint;
     private Point _receivedPoint;
     private Point _secKey;
 
-    public DiffieHellman(Point P, int rand, String s) {
-        _rand = rand;
+    public DiffieHellman(Point P, String s) {
+        _rand = randBigInt(C.getP());
         _P = new Point(P);
 
         if (s.equals("Alice"))

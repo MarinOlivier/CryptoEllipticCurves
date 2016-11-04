@@ -90,7 +90,7 @@ public class ClientThread extends Thread {
                     _srv.display("Start DH exchange keys with :");
                     _srv.display("gx = " + Main.C.getGx());
                     _srv.display("gy = " + Main.C.getGy());
-                    DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), 1234, "Bob");
+                    DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Bob");
                     DH.sendPointToClient(this);
                     break;
                 case ChatMessage.POINT:

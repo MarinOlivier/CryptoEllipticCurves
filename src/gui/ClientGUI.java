@@ -141,7 +141,7 @@ public class ClientGUI extends JFrame implements ActionListener{
             ta.append("gx = " + Main.C.getGx() +"\n");
             ta.append("gy = " + Main.C.getGy() +"\n");
 
-            DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), 4567, "Alice");
+            DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Alice");
             DH.sendPointToServ(client);
             return;
         }

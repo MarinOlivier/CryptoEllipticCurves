@@ -5,44 +5,29 @@ import curves.Point;
 import main.ChatMessage;
 import main.Client;
 import main.ClientThread;
+import main.Main;
 
 import java.math.BigInteger;
 
+import static main.Main.C;
 import static math.MathBigInt.*;
 
 /**
  * Created by Olivier on 30/10/2016.
  */
 public class ElGamal {
-    private Point _P;
+    private Point _G;
     private BigInteger _x;
     public Point _pubK;
     private Curve _c;
     public Point otherPubKey;
 
     public ElGamal(Point p, Curve c, String s) {
-        _P = p;
+        _G = p;
         _c = c;
         _x = randBigInt(_c.getN());
-        _pubK = _P.mult(_x);
+        _pubK = _G.mult(_x);
         System.out.println(s + "\n Pub key -> " + _pubK.getX());
-    }
-
-    private Point F(String m) {
-        System.out.println("Message = " + m);
-        BigInteger x = toBigInteger(m);
-        System.out.println("Message BigInt " + x);
-        BigInteger y;
-        y = (x.pow(3).add(_c.getA4().multiply(x)).add(_c.getA6())).mod(_c.getP());
-        System.out.println("y2 = " + y);
-        y = sqrtP(y, _c.getP());
-        System.out.println("y = " + y);
-        return new Point(_c, x, y, false);
-    }
-
-    private String invF(Point p) {
-        System.out.println("Message BigInt received " + p.getX());
-        return fromBigInteger(p.getX());
     }
 
     public boolean sendPubKToClient(ClientThread thread){
@@ -64,27 +49,25 @@ public class ElGamal {
 
     public String cipher(String m) {
         BigInteger k = randBigInt(_c.getN());
-        Point C1 = _P.mult(k);
-        Point C2 = otherPubKey.mult(k);
-        Point Pm = F(m);
+        Point C1 = otherPubKey.mult(k);
 
-        return C1.getX() + "|" + C1.getY() + "|" + C2.add(Pm).getX() + "|" + C2.add(Pm).getY();
+        BigInteger C1x = (toBigInteger(m).add(C1.getX())).mod(C.getP());
+        Point C2 = _G.mult(k);
+
+        return C1x + "|" + C2.getX() + "|" + C2.getY();
     }
 
     public String uncipher(String cipher) {
+        System.out.println("cipher = " + cipher);
         String[] tab;
         tab = cipher.split("\\|");
-        BigInteger C1x = new BigInteger(tab[0]);
-        BigInteger C1y = new BigInteger(tab[1]);
-        BigInteger Dx = new BigInteger(tab[2]);
-        BigInteger Dy = new BigInteger(tab[3]);
+        BigInteger C1 = new BigInteger(tab[0]);
+        BigInteger C2x = new BigInteger(tab[1]);
+        BigInteger C2y = new BigInteger(tab[2]);
 
-        Point C = new Point(_c, C1x, C1y, false);
-        Point D = new Point(_c, Dx, Dy, false);
-        Point Cp = C.mult(_x);
+        Point C2 = new Point(C, C2x, C2y, false);
 
-        Point Pm = D.add(Cp.opposite());
-        return invF(Pm);
+        return fromBigInteger((C1.subtract(C2.mult(_x).getX())).mod(C.getP()));
     }
 
 }
