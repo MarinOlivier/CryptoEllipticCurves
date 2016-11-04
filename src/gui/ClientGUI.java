@@ -42,9 +42,12 @@ public class ClientGUI extends JFrame implements ActionListener{
 
     private JButton DHStartBut;
     private JButton EGStartBut;
+    private JButton DSABut;
+
     public DiffieHellman DH;
     public ElGamal EG;
     public boolean inEG;
+    public boolean inDSA;
 
     // Constructor connection receiving a socket number
     public ClientGUI(String username) {
@@ -54,6 +57,7 @@ public class ClientGUI extends JFrame implements ActionListener{
         defaultPort = 1337;
         defaultHost = "localhost";
         inEG = false;
+        inDSA = false;
 
         input = new JTextArea();
 
@@ -65,12 +69,15 @@ public class ClientGUI extends JFrame implements ActionListener{
         JPanel northPane = new JPanel(new GridLayout(1, 3));
         DHStartBut = new JButton("Start DH");
         EGStartBut = new JButton("Start EG");
+        DSABut = new JButton("Start DSA");
 
         DHStartBut.addActionListener(this);
         EGStartBut.addActionListener(this);
+        DSABut.addActionListener(this);
 
         northPane.add(DHStartBut);
         northPane.add(EGStartBut);
+        northPane.add(DSABut);
         add(northPane, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(1,1));
@@ -166,10 +173,25 @@ public class ClientGUI extends JFrame implements ActionListener{
             DHStartBut.setEnabled(true);
             return;
         }
-        if (inEG){
+        if(inEG){
             client.sendMessage(new ChatMessage(ChatMessage.MSG_EG, EG.cipher(input.getText())));
             append(input.getText() + "\n", "Alice : ");
             input.setText("");
+            return;
+        }
+        if(o == DSABut && !inDSA){
+            client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "INIT"));
+            ta.append("Sign all message with DSA.\n");
+            inDSA = true;
+            DSABut.setText("Stop DSA");
+            return;
+        }
+        if(o == DSABut && inDSA){
+            client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "STOP"));
+            ta.append("Stop DSA.\n");
+
+            inDSA = false;
+            DSABut.setText("Start DSA");
             return;
         }
         if (connected) {

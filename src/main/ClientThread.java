@@ -32,10 +32,12 @@ public class ClientThread extends Thread {
     private DiffieHellman DH;
     private ElGamal EG;
     private boolean inEG;
+    private boolean inDSA;
 
     public ClientThread(Server srv, Socket socket) {
         _srv = srv;
         inEG = false;
+        inDSA = false;
         // a unique id
         id = ++_srv.uniqueId;
         this.socket = socket;
@@ -121,6 +123,14 @@ public class ClientThread extends Thread {
                     break;
                 case ChatMessage.STOPEG:
                     _srv.display("Stop EG.");
+                    break;
+                case ChatMessage.STARTDSA:
+                    if(message.equals("INIT")){
+                        _srv.display("Will check all message signature.");
+                    }
+                    if (message.equals("STOP")){
+                        _srv.display("Stopping DSA check.");
+                    }
                     break;
             }
         }
