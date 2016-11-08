@@ -62,6 +62,7 @@ public class ClientGUI extends JFrame implements ActionListener{
         // The CenterPanel which is the chat room
         ta = new JTextArea("Welcome to the Chat room\n");
 
+
         JPanel northPane = new JPanel(new GridLayout(1, 3));
         DHStartBut = new JButton("Start DH");
         EGStartBut = new JButton("Start EG");
@@ -106,9 +107,11 @@ public class ClientGUI extends JFrame implements ActionListener{
 
     // called by the Client to append text in the TextArea
     public void append(String str, String name) {
+        ta.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         ta.append(name + str);
         ta.setCaretPosition(ta.getText().length() - 1);
     }
+
     // called by the GUI is the connection failed
     // we reset our buttons, label, textfield
     public void connectionFailed() {
@@ -151,24 +154,17 @@ public class ClientGUI extends JFrame implements ActionListener{
             return;
         }
         if(inEG){
-            client.sendMessage(new ChatMessage(ChatMessage.MSG_EG, EG.cipher(input.getText())));
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, EG.cipher(input.getText())));
             append(input.getText() + "\n", "Alice : ");
             input.setText("");
             return;
         }
         if(o == DSABut && !inDSA){
-            client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "INIT"));
-            ta.append("Sign all message with DSA.\n");
-            inDSA = true;
-            DSABut.setText("Stop DSA");
+            initDSA();
             return;
         }
         if(o == DSABut && inDSA){
-            client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "STOP"));
-            ta.append("Stop DSA.\n");
-
-            inDSA = false;
-            DSABut.setText("Start DSA");
+            stopDSA();
             return;
         }
         if (connected) {
@@ -209,6 +205,25 @@ public class ClientGUI extends JFrame implements ActionListener{
         EGStartBut.setText("Start EG");
         DHStartBut.setEnabled(true);
         DSABut.setEnabled(true);
+    }
+
+    private void initDSA(){
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "INIT"));
+        ta.append("Sign all message with DSA.\n");
+        inDSA = true;
+        DSABut.setText("Stop DSA");
+        DHStartBut.setEnabled(false);
+        EGStartBut.setEnabled(false);
+    }
+
+    private void stopDSA(){
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "STOP"));
+        ta.append("Stop DSA.\n");
+
+        inDSA = false;
+        DSABut.setText("Start DSA");
+        DHStartBut.setEnabled(true);
+        EGStartBut.setEnabled(true);
     }
 
 }

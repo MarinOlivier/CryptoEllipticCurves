@@ -1,11 +1,9 @@
 package main;
 
 import crypto.DiffieHellman;
-import curves.Point;
 import gui.ServerGUI;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -17,7 +15,7 @@ public class Server {
     // a unique ID for each connection
     public int uniqueId;
     // an ArrayList to keep the list of the Client
-    private ArrayList<ClientThread> al;
+    private ClientThread ct;
     // if I am in a GUI
     private ServerGUI sg;
     // to display time
@@ -46,7 +44,7 @@ public class Server {
         // to display hh:mm:ss
         sdf = new SimpleDateFormat("HH:mm:ss");
         // ArrayList for the Client list
-        al = new ArrayList<ClientThread>();
+        //ct = new ClientThread();
     }
 
     public void start() {
@@ -67,24 +65,15 @@ public class Server {
                 // if I was asked to stop
                 if(!keepGoing)
                     break;
-                ClientThread t = new ClientThread(this, socket);  // make a thread of it
-                al.add(t);									// save it in the ArrayList
-                t.start();
+                ct = new ClientThread(this, socket);  // make a thread of it
+                ct.start();
             }
             // I was asked to stop
             try {
                 serverSocket.close();
-                for(int i = 0; i < al.size(); ++i) {
-                    ClientThread tc = al.get(i);
-                    try {
-                        tc.sInput.close();
-                        tc.sOutput.close();
-                        tc.socket.close();
-                    }
-                    catch(IOException ioE) {
-                        // not much I can do
-                    }
-                }
+                ct.sInput.close();
+                ct.sOutput.close();
+                ct.socket.close();
             }
             catch(Exception e) {
                 display("Exception closing the server and clients: " + e);
@@ -130,26 +119,11 @@ public class Server {
 
         // we loop in reverse order in case we would have to remove a Client
         // because it has disconnected
-        for(int i = al.size(); --i >= 0;) {
-            ClientThread ct = al.get(i);
-            // try to write to the Client if it fails remove it from the list
-            if(!ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageLf))) {
-                al.remove(i);
-                display("Disconnected Client " + ct.username + " removed from list.");
-            }
+        if(ct.isInEG()){
+            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, ct.getEG().cipher(messageLf)));
         }
-    }
-
-    // for a client who logoff using the LOGOUT message
-    synchronized void remove(int id) {
-        // scan the array list until we found the Id
-        for(int i = 0; i < al.size(); ++i) {
-            ClientThread ct = al.get(i);
-            // found it
-            if(ct.id == id) {
-                al.remove(i);
-                return;
-            }
+        else {
+            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageLf));
         }
     }
 

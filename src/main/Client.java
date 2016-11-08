@@ -154,7 +154,11 @@ public class Client {
                             System.out.println(msg);
                             System.out.print("> ");
                         } else {
-                            cg.append(msg, "");
+                            if(cg.inEG){
+                                cg.append(cg.EG.uncipher(msg), "");
+                            } else {
+                                cg.append(msg, "");
+                            }
                         }
                     }
                     if(type == ChatMessage.STARTDH){
@@ -168,9 +172,6 @@ public class Client {
                         cg.EG.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.inEG = true;
                         cg.sendBut.setEnabled(true);
-                    }
-                    if(type == ChatMessage.MSG_EG){
-                        cg.append(cg.EG.uncipher(msg), "Bob : ");
                     }
                 }
                 catch(IOException e) {

@@ -86,7 +86,11 @@ public class ClientThread extends Thread {
             switch(cm.getType()) {
 
                 case ChatMessage.MESSAGE:
-                    _srv.display(username + " : " + message);
+                    if(inEG) {
+                        _srv.display(EG.uncipher(message));
+                    } else {
+                        _srv.display(username + " : " + message);
+                    }
                     break;
                 case ChatMessage.STARTDH:
                     if(message.equals("INIT")){
@@ -108,22 +112,18 @@ public class ClientThread extends Thread {
                     inEG = true;
                     _srv.setEnableSendBut(true);
                     break;
-                case ChatMessage.MSG_EG:
-                    _srv.display(EG.uncipher(message));
-                    break;
                 case ChatMessage.STARTDSA:
                     if(message.equals("INIT")){
-                        _srv.display("Will check all message signature.");
+                        initDSA();
                     }
                     if (message.equals("STOP")){
-                        _srv.display("Stopping DSA check.");
+                        stopDSA();
                     }
                     break;
             }
         }
         // remove myself from the arrayList containing the list of the
         // connected Clients
-        _srv.remove(id);
         close();
     }
 
@@ -193,6 +193,23 @@ public class ClientThread extends Thread {
     }
 
     private void stopElGamal(){
+        inEG = false;
         _srv.display("Stop EG.");
+    }
+
+    private void initDSA(){
+        _srv.display("Will check all message signature.");
+    }
+
+    private void stopDSA(){
+        _srv.display("Stopping DSA check.");
+    }
+
+    public boolean isInEG() {
+        return inEG;
+    }
+
+    public ElGamal getEG() {
+        return EG;
     }
 }

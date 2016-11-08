@@ -76,7 +76,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
     // start or stop where clicked
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
-        System.out.println("o = " + o);
         if(o == sendBut){
             server.send("Bob : " + input.getText());
             server.display("Bob : " + input.getText());
@@ -98,7 +97,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         }
         catch(Exception er) {
             appendEvent("Invalid port number");
-            return;
         }
     }
 
