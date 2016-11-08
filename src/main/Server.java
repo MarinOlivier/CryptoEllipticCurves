@@ -113,17 +113,11 @@ public class Server {
      *  to send a message to all Clients
      */
     public synchronized void send(String message) {
-        // add HH:mm:ss and \n to the message
-        String time = sdf.format(new Date());
-        String messageLf = time + " " + message + "\n";
-
-        // we loop in reverse order in case we would have to remove a Client
-        // because it has disconnected
         if(ct.isInEG()){
-            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, ct.getEG().cipher(messageLf)));
+            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, ct.getEG().cipher(message)));
         }
         else {
-            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageLf));
+            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, message));
         }
     }
 
