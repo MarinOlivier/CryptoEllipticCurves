@@ -103,7 +103,6 @@ public class Point {
     }
 
     public Point doubl() {
-
         BigInteger l = ((new BigInteger("3").multiply(_x.pow(2))).add(_curve.getA4())).multiply((_y.multiply(new BigInteger("2"))).modInverse(_curve.getP()));
         l = l.mod(_curve.getP());
         BigInteger xr = l.pow(2).subtract(_x.multiply(new BigInteger("2")));
@@ -113,6 +112,9 @@ public class Point {
     }
 
     public Point mult(BigInteger k) {
+        if(k.equals(_curve.getN()))
+            return new Point(_curve, new BigInteger("0"), new BigInteger("1"), true);
+
         String bin = k.toString(2);
         Point q = new Point(_curve, true);
 

@@ -89,28 +89,18 @@ public class ClientThread extends Thread {
                     _srv.display(username + " : " + message);
                     break;
                 case ChatMessage.STARTDH:
-                    _srv.display("Start DH exchange keys with :");
-                    _srv.display("gx = " + Main.C.getGx());
-                    _srv.display("gy = " + Main.C.getGy());
-                    DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Bob");
-                    DH.sendPointToClient(this);
-                    break;
-                case ChatMessage.POINT:
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    if(message.equals("INIT")){
+                        initDH();
+                    } else {
+                        calcDHkey(message);
                     }
-                    DH.setReceivedPoint(new Point(Main.C, message), "Bob");
-                    DH.setSecKey("Bob");
-                    _srv.display("Secret key is : " + DH.getSecKey());
                     break;
                 case ChatMessage.STARTEG:
                     if(message.equals("INIT")){
-                        _srv.display("Start EG.");
-                        _srv.setEnableSendBut(false);
-                        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
-                        EG.sendPubKToClient(this);
+                        initElGamal();
+                    }
+                    if(message.equals("STOP")){
+                        stopElGamal();
                     }
                     break;
                 case ChatMessage.EGPUBK:
@@ -120,9 +110,6 @@ public class ClientThread extends Thread {
                     break;
                 case ChatMessage.MSG_EG:
                     _srv.display(EG.uncipher(message));
-                    break;
-                case ChatMessage.STOPEG:
-                    _srv.display("Stop EG.");
                     break;
                 case ChatMessage.STARTDSA:
                     if(message.equals("INIT")){
@@ -177,5 +164,35 @@ public class ClientThread extends Thread {
             _srv.display(e.toString());
         }
         return true;
+    }
+
+    private void initDH(){
+        _srv.display("Start DH exchange keys with :");
+        _srv.display("gx = " + Main.C.getGx());
+        _srv.display("gy = " + Main.C.getGy());
+        DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Bob");
+        DH.sendPointToClient(this);
+    }
+
+    private void calcDHkey(String message){
+        try {
+            sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        DH.setReceivedPoint(new Point(Main.C, message), "Bob");
+        DH.setSecKey("Bob");
+        _srv.display("Secret key is : " + DH.getSecKey());
+    }
+
+    private void initElGamal(){
+        _srv.display("Start EG.");
+        _srv.setEnableSendBut(false);
+        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
+        EG.sendPubKToClient(this);
+    }
+
+    private void stopElGamal(){
+        _srv.display("Stop EG.");
     }
 }

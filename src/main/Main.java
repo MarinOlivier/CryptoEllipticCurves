@@ -25,8 +25,8 @@ public class Main {
 	public static void main(String[] args) {
         C = new Curve("cw256", "w256-001.gp");
 
-        //ServerGUI serv = new ServerGUI(1337);
-        //ClientGUI cli = new ClientGUI("Alice");
+        ServerGUI serv = new ServerGUI(1337);
+        ClientGUI cli = new ClientGUI("Alice");
 
 		//Point P = new Point(C, C.getGx(), C.getGy(), false);
 		//System.out.println("1234 * " + C.getGx() );

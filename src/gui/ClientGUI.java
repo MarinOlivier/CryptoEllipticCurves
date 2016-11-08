@@ -2,18 +2,14 @@ package gui;
 
 import crypto.DiffieHellman;
 import crypto.ElGamal;
-import curves.*;
 import curves.Point;
 import main.ChatMessage;
 import main.Client;
 import main.Main;
-import math.MathBigInt;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.math.BigInteger;
-import java.math.BigInteger;
 
 import static java.lang.Thread.sleep;
 
@@ -143,34 +139,15 @@ public class ClientGUI extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         Object o = e.getSource();
         if(o == DHStartBut) {
-            client.sendMessage(new ChatMessage(ChatMessage.STARTDH, ""));
-            ta.append("Start DH exchange keys with :\n");
-            ta.append("gx = " + Main.C.getGx() +"\n");
-            ta.append("gy = " + Main.C.getGy() +"\n");
-
-            DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Alice");
-            DH.sendPointToServ(client);
+            startDH();
             return;
         }
         if(o == EGStartBut && !inEG) {
-            client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "INIT"));
-            ta.append("Start EG.\n");
-
-            EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Alice");
-            EG.sendPubKToServ(client);
-
-            EGStartBut.setText("Stop EG");
-            DHStartBut.setEnabled(false);
-            sendBut.setEnabled(false);
+            initElGamal();
             return;
         }
         if(o == EGStartBut && inEG) {
-            client.sendMessage(new ChatMessage(ChatMessage.STOPEG, ""));
-            ta.append("Stop EG.\n");
-
-            inEG = false;
-            EGStartBut.setText("Start EG");
-            DHStartBut.setEnabled(true);
+            stopElGamal();
             return;
         }
         if(inEG){
@@ -199,6 +176,39 @@ public class ClientGUI extends JFrame implements ActionListener{
             append(input.getText() + "\n", "Alice : ");
             input.setText("");
         }
+    }
+
+    private void startDH(){
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDH, "INIT"));
+        ta.append("Start DH exchange keys with :\n");
+        ta.append("gx = " + Main.C.getGx() +"\n");
+        ta.append("gy = " + Main.C.getGy() +"\n");
+
+        DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Alice");
+        DH.sendPointToServ(client);
+    }
+
+    private void initElGamal(){
+        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "INIT"));
+        ta.append("Start EG.\n");
+
+        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Alice");
+        EG.sendPubKToServ(client);
+
+        EGStartBut.setText("Stop EG");
+        DHStartBut.setEnabled(false);
+        DSABut.setEnabled(false);
+        sendBut.setEnabled(false);
+    }
+
+    private void stopElGamal(){
+        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "STOP"));
+        ta.append("Stop EG.\n");
+
+        inEG = false;
+        EGStartBut.setText("Start EG");
+        DHStartBut.setEnabled(true);
+        DSABut.setEnabled(true);
     }
 
 }

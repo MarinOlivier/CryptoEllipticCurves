@@ -33,13 +33,13 @@ public class DiffieHellman {
 
     public boolean sendPointToClient(ClientThread thread){
         String point = _calculatedPoint.getX().toString()+"|"+_calculatedPoint.getY().toString()+"|"+_calculatedPoint.isInf();
-        thread.writeMsg(new ChatMessage(ChatMessage.POINT, point));
+        thread.writeMsg(new ChatMessage(ChatMessage.STARTDH, point));
         return true;
     }
 
     public boolean sendPointToServ(Client client) {
         String point = _calculatedPoint.getX().toString()+"|"+_calculatedPoint.getY().toString()+"|"+_calculatedPoint.isInf();
-        client.sendMessage(new ChatMessage(ChatMessage.POINT, point));
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDH, point));
         return true;
     }
 

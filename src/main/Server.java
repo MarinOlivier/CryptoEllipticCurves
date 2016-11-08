@@ -121,9 +121,9 @@ public class Server {
             sg.appendEvent(time + "\n");
     }
     /*
-     *  to broadcast a message to all Clients
+     *  to send a message to all Clients
      */
-    public synchronized void broadcast(String message) {
+    public synchronized void send(String message) {
         // add HH:mm:ss and \n to the message
         String time = sdf.format(new Date());
         String messageLf = time + " " + message + "\n";

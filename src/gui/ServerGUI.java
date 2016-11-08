@@ -78,7 +78,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         Object o = e.getSource();
         System.out.println("o = " + o);
         if(o == sendBut){
-            server.broadcast("Bob : " + input.getText());
+            server.send("Bob : " + input.getText());
             server.display("Bob : " + input.getText());
             input.setText("");
             return;

@@ -157,7 +157,7 @@ public class Client {
                             cg.append(msg, "");
                         }
                     }
-                    if(type == ChatMessage.POINT){
+                    if(type == ChatMessage.STARTDH){
                         sleep(500);
                         cg.DH.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.DH.setSecKey("Alice");
