@@ -1,6 +1,12 @@
 package math;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
 /**
@@ -33,5 +39,17 @@ public class MathBigInt {
         } while (s.subtract(r).add(nm1).bitLength() >= nlen + 100);
 
         return r;
+    }
+
+    public static BigInteger SHA512(String m) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            byte[] output = digest.digest(m.getBytes());
+            digest.update(output);
+
+            return new BigInteger(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new UnsupportedOperationException(e);
+        }
     }
 }
