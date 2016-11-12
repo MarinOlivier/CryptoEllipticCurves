@@ -2,6 +2,10 @@ package crypto;
 
 import curves.Curve;
 import curves.Point;
+import main.ChatMessage;
+import main.Client;
+import main.ClientThread;
+import main.Main;
 
 import java.math.BigInteger;
 
@@ -17,6 +21,7 @@ public class DSA {
     private Point _Q;
     private Point _G;
     private Point _otherPub;
+    public Point _sign;
 
     public DSA(Curve C, Point G, String name) {
         _G = G;
@@ -25,7 +30,19 @@ public class DSA {
         _Q = G.mult(_s);
     }
 
-    public Point signDSA(String m) {
+    public boolean sendPubKToClient(ClientThread thread){
+        String pubK = _Q.getX().toString()+"|"+_Q.getY().toString()+"|"+_Q.isInf();
+        thread.writeMsg(new ChatMessage(ChatMessage.DSAPUBK, pubK));
+        return true;
+    }
+
+    public boolean sendPubKToServ(Client client) {
+        String point = _Q.getX().toString()+"|"+_Q.getY().toString()+"|"+_Q.isInf();
+        client.sendMessage(new ChatMessage(ChatMessage.DSAPUBK, point));
+        return true;
+    }
+
+    public String signDSA(String m) {
         BigInteger k = randBigInt(_C.getN());
         Point G = _G.mult(k);
 
@@ -38,16 +55,17 @@ public class DSA {
         if(y.equals(new BigInteger("0")))
             return signDSA(m);
 
-        return new Point(_C, x, y, false);
+        Point P = new Point(_C, x, y, false);
+        return P.getX() + "|" + P.getY();
     }
 
-    public boolean verifyDSA(Point P, String m) {
-        BigInteger a = (SHA512(m).multiply(P.getY().modInverse(_C.getN()))).mod(_C.getN());
+    public boolean verifyDSA(String m) {
+        BigInteger a = (SHA512(m).multiply(_sign.getY().modInverse(_C.getN()))).mod(_C.getN());
         Point T = _G.mult(a);
-        BigInteger b = (P.getX().multiply(P.getY().modInverse(_C.getN()))).mod(_C.getN());
+        BigInteger b = (_sign.getX().multiply(_sign.getY().modInverse(_C.getN()))).mod(_C.getN());
         Point Tp = _otherPub.mult(b);
         T = T.add(Tp);
-        return P.getX().equals(T.getX());
+        return _sign.getX().equals(T.getX());
     }
 
     public void setOtherPub(Point _otherPub) {
@@ -56,5 +74,13 @@ public class DSA {
 
     public Point getQ() {
         return _Q;
+    }
+
+    public void setSign(String s) {
+        String[] tab;
+        tab = s.split("\\|");
+        BigInteger x = new BigInteger(tab[0]);
+        BigInteger y = new BigInteger(tab[1]);
+        _sign = new Point(Main.C, x, y, false);
     }
 }

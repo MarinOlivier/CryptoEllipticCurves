@@ -8,7 +8,8 @@ import java.io.Serializable;
 public class ChatMessage implements Serializable {
     protected static final long serialVersionUID = 1112122200L;
 
-    public static final int MESSAGE = 1, STARTDH = 2, POINT = 3, STARTEG = 4, EGPUBK =5, MSG_EG = 6, STOPEG = 7, STARTDSA = 8;
+    public static final int MESSAGE = 1, STARTDH = 2, POINT = 3, STARTEG = 4, EGPUBK = 5, MSG_EG = 6, STOPEG = 7, STARTDSA = 8,
+            DSAPUBK = 9, DSASIGN = 10;
     private int type;
     private String message;
 

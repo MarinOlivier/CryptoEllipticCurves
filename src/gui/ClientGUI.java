@@ -1,5 +1,6 @@
 package gui;
 
+import crypto.DSA;
 import crypto.DiffieHellman;
 import crypto.ElGamal;
 import curves.Point;
@@ -48,6 +49,7 @@ public class ClientGUI extends JFrame implements ActionListener {
 
     public DiffieHellman DH;
     public ElGamal EG;
+    public DSA Dsa;
     public boolean inEG;
     public boolean inDSA;
     private int widht = 400;
@@ -205,7 +207,16 @@ public class ClientGUI extends JFrame implements ActionListener {
             stopDSA();
             return;
         }
+        if(inDSA){
+            client.sendMessage(new ChatMessage(ChatMessage.DSASIGN, Dsa.signDSA(input.getText())));
+
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
+            append(input.getText() + "\n", "Alice : ");
+            input.setText("");
+            return;
+        }
         if (connected) {
+            System.out.println("inDSA = " + inDSA);
             client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
             append(input.getText() + "\n", "Alice : ");
             input.setText("");
@@ -252,6 +263,11 @@ public class ClientGUI extends JFrame implements ActionListener {
         DSABut.setText("Stop DSA");
         DHStartBut.setEnabled(false);
         EGStartBut.setEnabled(false);
+
+        Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
+        Dsa = new DSA(Main.C, G, "Alice");
+
+        Dsa.sendPubKToServ(client);
     }
 
     private void stopDSA() {

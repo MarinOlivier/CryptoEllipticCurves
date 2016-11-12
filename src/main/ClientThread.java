@@ -4,6 +4,7 @@ package main;
  * Created by Olivier on 28/10/2016.
  */
 
+import crypto.DSA;
 import crypto.DiffieHellman;
 import crypto.ElGamal;
 import curves.Point;
@@ -31,6 +32,7 @@ public class ClientThread extends Thread {
     Server _srv;
     private DiffieHellman DH;
     private ElGamal EG;
+    private DSA Dsa;
     private boolean inEG;
     private boolean inDSA;
 
@@ -88,6 +90,12 @@ public class ClientThread extends Thread {
                 case ChatMessage.MESSAGE:
                     if(inEG) {
                         _srv.display(EG.uncipher(message));
+                    } else if(inDSA) {
+                        boolean verified  = Dsa.verifyDSA(message);
+                        if(verified)
+                            _srv.display(username + " : " + message + "\nVerified");
+                        else
+                            _srv.display(username + " : " + message + "\nNot Verified");
                     } else {
                         _srv.display(username + " : " + message);
                     }
@@ -119,6 +127,12 @@ public class ClientThread extends Thread {
                     if (message.equals("STOP")){
                         stopDSA();
                     }
+                    break;
+                case ChatMessage.DSAPUBK:
+                    Dsa.setOtherPub(new Point(Main.C, message));
+                    break;
+                case ChatMessage.DSASIGN:
+                    Dsa.setSign(message);
                     break;
             }
         }
@@ -199,17 +213,30 @@ public class ClientThread extends Thread {
 
     private void initDSA(){
         _srv.display("Will check all message signature.");
+        inDSA = true;
+        Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
+        Dsa = new DSA(Main.C, G, "Bob");
+        Dsa.sendPubKToClient(this);
     }
 
     private void stopDSA(){
         _srv.display("Stopping DSA check.");
+        inDSA = false;
     }
 
     public boolean isInEG() {
         return inEG;
     }
 
+    public boolean isInDSA() {
+        return inDSA;
+    }
+
     public ElGamal getEG() {
         return EG;
+    }
+
+    public DSA getDsa() {
+        return Dsa;
     }
 }

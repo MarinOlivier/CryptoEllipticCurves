@@ -156,6 +156,13 @@ public class Client {
                         } else {
                             if(cg.inEG){
                                 cg.append(cg.EG.uncipher(msg), "");
+                            } else if(cg.inDSA){
+                                sleep(500);
+                                boolean verified = cg.Dsa.verifyDSA(msg);
+                                if(verified)
+                                    cg.append(msg + "\nVerified", "");
+                                else
+                                    cg.append(msg + "\nNot verified", "");
                             } else {
                                 cg.append(msg, "");
                             }
@@ -172,6 +179,13 @@ public class Client {
                         cg.EG.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.inEG = true;
                         cg.sendBut.setEnabled(true);
+                    }
+                    if(type == ChatMessage.DSAPUBK) {
+                        sleep(500);
+                        cg.Dsa.setOtherPub(new Point(Main.C, msg));
+                    }
+                    if(type == ChatMessage.DSASIGN){
+                        cg.Dsa.setSign(msg);
                     }
                 }
                 catch(IOException e) {

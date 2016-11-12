@@ -115,6 +115,9 @@ public class Server {
     public synchronized void send(String message) {
         if(ct.isInEG()){
             ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, ct.getEG().cipher(message)));
+        } else if(ct.isInDSA()) {
+            ct.writeMsg(new ChatMessage(ChatMessage.DSASIGN, ct.getDsa().signDSA(message)));
+            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, message));
         }
         else {
             ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, message));

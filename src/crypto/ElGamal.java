@@ -5,7 +5,6 @@ import curves.Point;
 import main.ChatMessage;
 import main.Client;
 import main.ClientThread;
-import main.Main;
 
 import java.math.BigInteger;
 
