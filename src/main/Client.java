@@ -159,10 +159,7 @@ public class Client {
                             } else if(cg.inDSA){
                                 sleep(500);
                                 boolean verified = cg.Dsa.verifyDSA(msg);
-                                if(verified)
-                                    cg.append(msg + "\nVerified", "");
-                                else
-                                    cg.append(msg + "\nNot verified", "");
+                                appendSignedMsg(verified, msg);
                             } else {
                                 cg.append(msg, "");
                             }
@@ -172,7 +169,7 @@ public class Client {
                         sleep(500);
                         cg.DH.setReceivedPoint(new Point(Main.C, msg), "Alice");
                         cg.DH.setSecKey("Alice");
-                        cg.append("Secret key : " + cg.DH.getSecKey() + "\n", "");
+                        cg.append("Secret key :\nx = " + cg.DH.getSecKey().getX() + "\ny = " + cg.DH.getSecKey().getY() + "\n", "");
                     }
                     if(type == ChatMessage.EGPUBK){
                         sleep(500);
@@ -200,6 +197,13 @@ public class Client {
                     e.printStackTrace();
                 }
             }
+        }
+
+        private void appendSignedMsg(boolean verified, String msg) {
+            if(verified)
+                cg.append(msg + "\nSignature OK.", "");
+            else
+                cg.append(msg + "\nSignature ERROR.", "");
         }
     }
 }

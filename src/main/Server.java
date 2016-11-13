@@ -59,7 +59,7 @@ public class Server {
             while(keepGoing)
             {
                 // format message saying we are waiting
-                display("Server waiting for Clients on port " + port + ".");
+                display("Server waiting for Clients on port " + port + ".", "");
 
                 Socket socket = serverSocket.accept();  	// accept connection
                 // if I was asked to stop
@@ -76,13 +76,13 @@ public class Server {
                 ct.socket.close();
             }
             catch(Exception e) {
-                display("Exception closing the server and clients: " + e);
+                display("Exception closing the server and clients: " + e, "");
             }
         }
         // something went bad
         catch (IOException e) {
             String msg = sdf.format(new Date()) + " Exception on new ServerSocket: " + e + "\n";
-            display(msg);
+            display(msg, "");
         }
     }
     /*
@@ -102,12 +102,12 @@ public class Server {
     /*
      * Display an event (not a message) to the console or the GUI
      */
-    public void display(String msg) {
-        String time = sdf.format(new Date()) + " " + msg;
+    public void display(String msg, String name) {
+        //String time = sdf.format(new Date()) + " " + msg;
         if(sg == null)
-            System.out.println(time);
+            System.out.println(msg);
         else
-            sg.appendEvent(time + "\n");
+            sg.appendEvent(msg, name);
     }
     /*
      *  to send a message to all Clients

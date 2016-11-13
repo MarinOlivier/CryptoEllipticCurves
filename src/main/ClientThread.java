@@ -52,10 +52,10 @@ public class ClientThread extends Thread {
             sInput  = new ObjectInputStream(socket.getInputStream());
             // read the username
             username = (String) sInput.readObject();
-            _srv.display(username + " just connected.");
+            _srv.display(username + " just connected.", "");
         }
         catch (IOException e) {
-            _srv.display("Exception creating new Input/output Streams: " + e);
+            _srv.display("Exception creating new Input/output Streams: " + e, "Bob");
             return;
         }
         // have to catch ClassNotFoundException
@@ -75,7 +75,7 @@ public class ClientThread extends Thread {
                 cm = (ChatMessage) sInput.readObject();
             }
             catch (IOException e) {
-                _srv.display(username + " Exception reading Streams: " + e);
+                _srv.display(username + " Exception reading Streams: " + e, "Bob");
                 break;
             }
             catch(ClassNotFoundException e2) {
@@ -89,15 +89,13 @@ public class ClientThread extends Thread {
 
                 case ChatMessage.MESSAGE:
                     if(inEG) {
-                        _srv.display(EG.uncipher(message));
+                        _srv.display(EG.uncipher(message), "");
                     } else if(inDSA) {
                         boolean verified  = Dsa.verifyDSA(message);
-                        if(verified)
-                            _srv.display(username + " : " + message + "\nVerified");
-                        else
-                            _srv.display(username + " : " + message + "\nNot Verified");
+                        appendSignedMsg(verified, message);
                     } else {
-                        _srv.display(username + " : " + message);
+                        _srv.display(username + " : " + message, "" +
+                                "");
                     }
                     break;
                 case ChatMessage.STARTDH:
@@ -174,16 +172,13 @@ public class ClientThread extends Thread {
         }
         // if an error occurs, do not abort just inform the user
         catch(IOException e) {
-            _srv.display("Error sending message to " + username);
-            _srv.display(e.toString());
+            _srv.display("Error sending message to " + username, "Bob");
+            _srv.display(e.toString(), "Bob");
         }
         return true;
     }
 
     private void initDH(){
-        _srv.display("Start DH exchange keys with :");
-        _srv.display("gx = " + Main.C.getGx());
-        _srv.display("gy = " + Main.C.getGy());
         DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Bob");
         DH.sendPointToClient(this);
     }
@@ -196,11 +191,11 @@ public class ClientThread extends Thread {
         }
         DH.setReceivedPoint(new Point(Main.C, message), "Bob");
         DH.setSecKey("Bob");
-        _srv.display("Secret key is : " + DH.getSecKey());
+        _srv.display("Secret key is :\nx = " + DH.getSecKey().getX() + "\ny = " + DH.getSecKey().getY() + "\n", "");
     }
 
     private void initElGamal(){
-        _srv.display("Start EG.");
+        _srv.display("Starting ElGamal encryption.", "");
         _srv.setEnableSendBut(false);
         EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
         EG.sendPubKToClient(this);
@@ -208,11 +203,11 @@ public class ClientThread extends Thread {
 
     private void stopElGamal(){
         inEG = false;
-        _srv.display("Stop EG.");
+        _srv.display("Stopping ElGamal encryption.", "");
     }
 
     private void initDSA(){
-        _srv.display("Will check all message signature.");
+        _srv.display("All messages will be signed.", "");
         inDSA = true;
         Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
         Dsa = new DSA(Main.C, G, "Bob");
@@ -220,8 +215,15 @@ public class ClientThread extends Thread {
     }
 
     private void stopDSA(){
-        _srv.display("Stopping DSA check.");
+        _srv.display("Stopping DSA check.", "");
         inDSA = false;
+    }
+
+    private void appendSignedMsg(boolean verified, String message) {
+        if(verified)
+            _srv.display(username + " : " + message + "\nSignature OK.", "");
+        else
+            _srv.display(username + " : " + message + "\nSignature ERROR.", "");
     }
 
     public boolean isInEG() {

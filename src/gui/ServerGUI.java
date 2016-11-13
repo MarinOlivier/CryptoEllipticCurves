@@ -3,6 +3,7 @@ package gui;
 import main.Server;
 
 import javax.swing.*;
+import javax.swing.border.AbstractBorder;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -22,7 +23,8 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
     private Server server;
     private JTextArea input;
     public JButton sendBut;
-
+    private int widht = 400;
+    private JPanel chatBox;
 
     // server constructor that receive the port to listen to for connection as parameter
     public ServerGUI(int port) {
@@ -32,10 +34,11 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         setLayout(new BorderLayout());
         event = new JTextArea();
         event.setEditable(false);
-        appendEvent("Events log.\n");
+        chatBox = new JPanel(new GridLayout(100000, 1));
 
         JPanel centerPanel = new JPanel(new GridLayout(1,1));
-        centerPanel.add(new JScrollPane(event));
+        //centerPanel.add(new JScrollPane(event));
+        centerPanel.add(new JScrollPane(chatBox));
         add(centerPanel, BorderLayout.CENTER);
 
         input = new JTextArea();
@@ -60,7 +63,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
 
         // need to be informed when the user click the close button on the frame
         addWindowListener(this);
-        setSize(400, 600);
+        setSize(widht, 600);
         setVisible(true);
 
         // ceate a new Server
@@ -69,8 +72,33 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         new ServerRunning().start();
     }
 
-    public void appendEvent(String str) {
-        event.append(str);
+    public void appendEvent(String str, String name) {
+        //event.append(str);
+        AbstractBorder brdrLeft = new TextBubbleBorder(Color.WHITE,1,10,8);
+        AbstractBorder brdrRight = new TextBubbleBorder(Color.LIGHT_GRAY,1,10,8,false);
+
+        JTextPane txt = new JTextPane();
+        txt.setEditable(false);
+        JPanel msgPane = new JPanel(new BorderLayout());
+
+        txt.setText(name + str);
+        txt.setMaximumSize(new Dimension(widht / 2, 10000));
+        txt.setMinimumSize(new Dimension(widht / 2, 20));
+
+        if (name.equals("Bob : ")) {
+            txt.setBorder(brdrRight);
+            txt.setBackground(Color.LIGHT_GRAY);
+            msgPane.add(txt, BorderLayout.EAST);
+        }
+        else {
+            txt.setBorder(brdrLeft);
+            txt.setBackground(Color.WHITE);
+            msgPane.add(txt, BorderLayout.WEST);
+        }
+
+        chatBox.add(msgPane);
+        chatBox.revalidate();
+        chatBox.repaint();
     }
 
     // start or stop where clicked
@@ -78,7 +106,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         Object o = e.getSource();
         if(o == sendBut){
             server.send("Bob : " + input.getText());
-            server.display("Bob : " + input.getText());
+            server.display(input.getText(), "Bob : ");
             input.setText("");
             return;
         }
@@ -96,7 +124,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
             port = Integer.parseInt(tPortNumber.getText().trim());
         }
         catch(Exception er) {
-            appendEvent("Invalid port number");
+            appendEvent("Invalid port number", "Bob : ");
         }
     }
 
@@ -135,7 +163,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
             // the server failed
             stopStart.setText("Start");
             tPortNumber.setEditable(true);
-            appendEvent("Server crashed\n");
+            appendEvent("Server crashed\n", "Bob : ");
             server = null;
         }
     }
