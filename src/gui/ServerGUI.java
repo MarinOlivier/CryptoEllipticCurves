@@ -110,22 +110,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
             input.setText("");
             return;
         }
-        // if running we have to stop
-        if(server != null) {
-            server.stop();
-            server = null;
-            tPortNumber.setEditable(true);
-            stopStart.setText("Start");
-            return;
-        }
-        // OK start the server
-        int port;
-        try {
-            port = Integer.parseInt(tPortNumber.getText().trim());
-        }
-        catch(Exception er) {
-            appendEvent("Invalid port number", "Bob : ");
-        }
     }
 
     /*
