@@ -119,27 +119,22 @@ public class Server {
     /*
      *  to send a message to all Clients
      */
-    synchronized void broadcast(String name, String message) {
-        // add HH:mm:ss and \n to the message
-        String time = sdf.format(new Date());
-        String messageName = name + " : " + message + "\n";
-        // display message on console or GUI
-        if(sg == null)
-            System.out.print(messageName);
-        else
-            sg.appendEvent(messageName, "");     // append in the room window
+    synchronized void broadcast(ChatMessage cm) {
+        String message = cm.getMessage();
+        String[] tab = message.split("/");
+        String name = tab[0];
 
         // we loop in reverse order in case we would have to remove a Client
         // because it has disconnected
         for(int i = al.size(); --i >= 0;) {
             ClientThread ct = al.get(i);
             if(!ct.username.equals(name)) {
-                // try to write to the Client if it fails remove it from the list
-                if (!ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageName))) {
-                    al.remove(i);
-                    display("Disconnected Client " + ct.username + " removed from list.", "");
-                }
+                ct.writeMsg(cm);
             }
         }
+    }
+
+    public int getPort() {
+        return port;
     }
 }

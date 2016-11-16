@@ -1,5 +1,6 @@
 package main;
 
+import crypto.DiffieHellman;
 import curves.Point;
 import gui.ClientGUI;
 
@@ -149,27 +150,36 @@ public class Client {
                     int type = chtMsg.getType();
                     String msg = chtMsg.getMessage();
                     if(type == ChatMessage.MESSAGE) {
-                        // if console mode print the message and add back the prompt
-                        if (cg == null) {
-                            System.out.println(msg);
-                            System.out.print("> ");
+                        String[] tab = msg.split("/");
+                        String name = tab[0];
+                        msg = tab[1];
+                        String msgName = name + " : " + msg;
+
+                        if(cg.inEG){
+                            cg.append(cg.EG.uncipher(msgName), "");
+                        } else if(cg.inDSA){
+                            boolean verified = cg.Dsa.verifyDSA(msgName);
+                            appendSignedMsg(verified, msgName);
                         } else {
-                            if(cg.inEG){
-                                cg.append(cg.EG.uncipher(msg), "");
-                            } else if(cg.inDSA){
-                                sleep(500);
-                                boolean verified = cg.Dsa.verifyDSA(msg);
-                                appendSignedMsg(verified, msg);
-                            } else {
-                                cg.append(msg, "");
-                            }
+                            cg.append(msgName, "");
                         }
                     }
                     if(type == ChatMessage.STARTDH){
-                        sleep(500);
-                        cg.DH.setReceivedPoint(new Point(Main.C, msg), "Alice");
-                        cg.DH.setSecKey("Alice");
-                        cg.append("Secret key :\nx = " + cg.DH.getSecKey().getX() + "\ny = " + cg.DH.getSecKey().getY() + "\n", "");
+                        msg = msg.split("/")[1];
+                        if(cg.DH == null) {
+                            cg.DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), username);
+                            cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
+                            sendMessage(new ChatMessage(ChatMessage.STARTDH, cg.DH.getPubK()));
+                        } else {
+                            cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
+                        }
+
+                        cg.DH.setSecKey();
+                        msg = "Secret key :";
+                        msg += "\n  x = " + cg.DH.getSecKey().getX();
+                        msg += "\n  y = " + cg.DH.getSecKey().getY();
+                        cg.append(msg, "");
+
                     }
                     if(type == ChatMessage.EGPUBK){
                         sleep(500);

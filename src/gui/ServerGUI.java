@@ -13,70 +13,41 @@ import java.awt.event.*;
  */
 public class ServerGUI extends JFrame implements ActionListener, WindowListener {
     private static final long serialVersionUID = 1L;
-    // the stop and start buttons
-    private JButton stopStart;
-    // JTextArea for the chat room and the events
-    private JTextArea event;
-    // The port number
-    private JTextField tPortNumber;
     // my server
     private Server server;
-    private int widht = 400;
-    private JPanel chatBox;
+
+    private JPanel mainPane;
+
 
     // server constructor that receive the port to listen to for connection as parameter
     public ServerGUI(int port) {
-        super("Chat Server Bob");
+        super("Chat Server");
         server = null;
 
-        setLayout(new BorderLayout());
-        event = new JTextArea();
-        event.setEditable(false);
-        chatBox = new JPanel(new GridLayout(100000, 1));
+        mainPane = new JPanel();
+        JLabel state = new JLabel("Server is stopped");
 
-        JPanel centerPanel = new JPanel(new GridLayout(1,1));
-        //centerPanel.add(new JScrollPane(event));
-        centerPanel.add(new JScrollPane(chatBox));
-        add(centerPanel, BorderLayout.CENTER);
+        state.setFont(new Font("Helvetica",1,20));
 
-        // need to be informed when the user click the close button on the frame
-        addWindowListener(this);
-        setSize(widht, 600);
+        mainPane.add(state);
+
+        add(mainPane);
+
+        setSize(300, 100);
         setVisible(true);
 
         // ceate a new Server
         server = new Server(port, this);
         // and start it as a thread
         new ServerRunning().start();
+        state.setText("Server is running");
+        mainPane.add(state);
+        mainPane.revalidate();
+        mainPane.repaint();
     }
 
     public void appendEvent(String str, String name) {
-        //event.append(str);
-        AbstractBorder brdrLeft = new TextBubbleBorder(Color.WHITE,1,10,8);
-        AbstractBorder brdrRight = new TextBubbleBorder(Color.LIGHT_GRAY,1,10,8,false);
 
-        JTextPane txt = new JTextPane();
-        txt.setEditable(false);
-        JPanel msgPane = new JPanel(new BorderLayout());
-
-        txt.setText(name + str);
-        txt.setMaximumSize(new Dimension(widht / 2, 10000));
-        txt.setMinimumSize(new Dimension(widht / 2, 20));
-
-        if (name.equals("Bob : ")) {
-            txt.setBorder(brdrRight);
-            txt.setBackground(Color.LIGHT_GRAY);
-            msgPane.add(txt, BorderLayout.EAST);
-        }
-        else {
-            txt.setBorder(brdrLeft);
-            txt.setBackground(Color.WHITE);
-            msgPane.add(txt, BorderLayout.WEST);
-        }
-
-        chatBox.add(msgPane);
-        chatBox.revalidate();
-        chatBox.repaint();
     }
 
     // start or stop where clicked
@@ -118,8 +89,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         public void run() {
             server.start();         // should execute until if fails
             // the server failed
-            stopStart.setText("Start");
-            tPortNumber.setEditable(true);
             appendEvent("Server crashed\n", "Bob : ");
             server = null;
         }

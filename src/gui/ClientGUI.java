@@ -10,11 +10,8 @@ import main.Main;
 
 import javax.swing.*;
 import javax.swing.border.AbstractBorder;
-import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Area;
-import java.awt.geom.RoundRectangle2D;
 
 import static java.lang.Thread.sleep;
 
@@ -216,27 +213,24 @@ public class ClientGUI extends JFrame implements ActionListener {
             return;
         }
         if (connected) {
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "|" + input.getText()));
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "/" + input.getText()));
             append(input.getText() + "\n", username + " : ");
             input.setText("");
         }
     }
 
     private void startDH() {
-        client.sendMessage(new ChatMessage(ChatMessage.STARTDH, "INIT"));
-        //chatBox.append("Start DH exchange keys with :\n");
-        //chatBox.append("gx = " + Main.C.getGx() +"\n");
-        //chatBox.append("gy = " + Main.C.getGy() +"\n");
-
-        DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Alice");
-        DH.sendPointToServ(client);
+        DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), username);
+        //client.sendMessage(new ChatMessage(ChatMessage.STARTDH, "INIT"));
+        //DH.sendPoint(client);
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDH, DH.getPubK()));
     }
 
     private void initElGamal() {
         client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "INIT"));
         append("Starting ElGamal encryption.", "");
 
-        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Alice");
+        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, username);
         EG.sendPubKToServ(client);
 
         EGStartBut.setText("Stop EG");

@@ -82,12 +82,8 @@ public class ClientThread extends Thread {
                 break;
             }
             // the messaage part of the ChatMessage
-            String message = cm.getMessage();
-            String[] tab;
-            tab = message.split("\\|");
-            String name = tab[0];
-            message = tab[1];
-            _srv.broadcast(name, message);
+
+            _srv.broadcast(cm);
         }
         // remove myself from the arrayList containing the list of the
         // connected Clients
@@ -134,7 +130,7 @@ public class ClientThread extends Thread {
 
     private void initDH(){
         DH = new DiffieHellman(new curves.Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), "Bob");
-        DH.sendPointToClient(this);
+        //DH.sendPointToClient(this);
     }
 
     private void calcDHkey(String message){
@@ -144,7 +140,7 @@ public class ClientThread extends Thread {
             e.printStackTrace();
         }
         DH.setReceivedPoint(new Point(Main.C, message), "Bob");
-        DH.setSecKey("Bob");
+        DH.setSecKey();
         _srv.display("Secret key is :\nx = " + DH.getSecKey().getX() + "\ny = " + DH.getSecKey().getY() + "\n", "");
     }
 

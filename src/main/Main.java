@@ -29,7 +29,7 @@ public class Main {
 
         ServerGUI serv = new ServerGUI(1337);
         ClientGUI cli = new ClientGUI("Alice");
-        ClientGUI cli2 = new ClientGUI("Oscar");
+        ClientGUI cli2 = new ClientGUI("Bob");
 	}
 
 }
