@@ -83,56 +83,11 @@ public class ClientThread extends Thread {
             }
             // the messaage part of the ChatMessage
             String message = cm.getMessage();
-
-            // Switch on the type of message receive
-            switch(cm.getType()) {
-
-                case ChatMessage.MESSAGE:
-                    if(inEG) {
-                        _srv.display(EG.uncipher(message), "");
-                    } else if(inDSA) {
-                        boolean verified  = Dsa.verifyDSA(message);
-                        appendSignedMsg(verified, message);
-                    } else {
-                        _srv.display(username + " : " + message, "" +
-                                "");
-                    }
-                    break;
-                case ChatMessage.STARTDH:
-                    if(message.equals("INIT")){
-                        initDH();
-                    } else {
-                        calcDHkey(message);
-                    }
-                    break;
-                case ChatMessage.STARTEG:
-                    if(message.equals("INIT")){
-                        initElGamal();
-                    }
-                    if(message.equals("STOP")){
-                        stopElGamal();
-                    }
-                    break;
-                case ChatMessage.EGPUBK:
-                    EG.setReceivedPoint(new Point(Main.C, message), "Bob");
-                    inEG = true;
-                    _srv.setEnableSendBut(true);
-                    break;
-                case ChatMessage.STARTDSA:
-                    if(message.equals("INIT")){
-                        initDSA();
-                    }
-                    if (message.equals("STOP")){
-                        stopDSA();
-                    }
-                    break;
-                case ChatMessage.DSAPUBK:
-                    Dsa.setOtherPub(new Point(Main.C, message));
-                    break;
-                case ChatMessage.DSASIGN:
-                    Dsa.setSign(message);
-                    break;
-            }
+            String[] tab;
+            tab = message.split("\\|");
+            String name = tab[0];
+            message = tab[1];
+            _srv.broadcast(name, message);
         }
         // remove myself from the arrayList containing the list of the
         // connected Clients
@@ -167,7 +122,6 @@ public class ClientThread extends Thread {
         }
         // write the message to the stream
         try {
-
             sOutput.writeObject(chtMsg);
         }
         // if an error occurs, do not abort just inform the user
@@ -196,7 +150,6 @@ public class ClientThread extends Thread {
 
     private void initElGamal(){
         _srv.display("Starting ElGamal encryption.", "");
-        _srv.setEnableSendBut(false);
         EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, "Bob");
         EG.sendPubKToClient(this);
     }

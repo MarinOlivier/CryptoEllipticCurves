@@ -136,7 +136,7 @@ public class ClientGUI extends JFrame implements ActionListener {
 
         msgPane.setBorder(BorderFactory.createEmptyBorder(3, 2, 1, 2));
 
-        if (name.equals("Alice : ")) {
+        if (name.equals(username + " : ")) {
             txt.setBorder(brdrRight);
             txt.setBackground(Color.LIGHT_GRAY);
             msgPane.add(txt, BorderLayout.EAST);
@@ -211,13 +211,13 @@ public class ClientGUI extends JFrame implements ActionListener {
             client.sendMessage(new ChatMessage(ChatMessage.DSASIGN, Dsa.signDSA(input.getText())));
 
             client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
-            append(input.getText() + "\n", "Alice : ");
+            append(input.getText() + "\n", username + " : ");
             input.setText("");
             return;
         }
         if (connected) {
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
-            append(input.getText() + "\n", "Alice : ");
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "|" + input.getText()));
+            append(input.getText() + "\n", username + " : ");
             input.setText("");
         }
     }

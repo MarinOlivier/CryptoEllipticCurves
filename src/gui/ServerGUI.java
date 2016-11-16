@@ -21,8 +21,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
     private JTextField tPortNumber;
     // my server
     private Server server;
-    private JTextArea input;
-    public JButton sendBut;
     private int widht = 400;
     private JPanel chatBox;
 
@@ -40,26 +38,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
         //centerPanel.add(new JScrollPane(event));
         centerPanel.add(new JScrollPane(chatBox));
         add(centerPanel, BorderLayout.CENTER);
-
-        input = new JTextArea();
-
-        sendBut = new JButton("Send");
-
-        JPanel southPanel = new JPanel();
-
-        sendBut.addActionListener(this);
-
-        southPanel.setBackground(Color.WHITE);
-        southPanel.setLayout(new BorderLayout());
-        southPanel.add(input, BorderLayout.CENTER);
-        southPanel.add(sendBut, BorderLayout.EAST);
-
-        int inputHeight = 75;
-        int widht = 400;
-
-        southPanel.setSize(widht, inputHeight);
-
-        add(southPanel, BorderLayout.SOUTH);
 
         // need to be informed when the user click the close button on the frame
         addWindowListener(this);
@@ -103,13 +81,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
 
     // start or stop where clicked
     public void actionPerformed(ActionEvent e) {
-        Object o = e.getSource();
-        if(o == sendBut){
-            server.send("Bob : " + input.getText());
-            server.display(input.getText(), "Bob : ");
-            input.setText("");
-            return;
-        }
+
     }
 
     /*

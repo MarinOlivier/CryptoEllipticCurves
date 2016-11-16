@@ -121,30 +121,28 @@ public class Server {
     /*
      *  to send a message to all Clients
      */
-    private synchronized void broadcast(String message) {
+    public synchronized void broadcast(String name, String message) {
         // add HH:mm:ss and \n to the message
         String time = sdf.format(new Date());
-        String messageLf = time + " " + message + "\n";
+        String messageName = name + " : " + message + "\n";
         // display message on console or GUI
         if(sg == null)
-            System.out.print(messageLf);
+            System.out.print(messageName);
         else
-            sg.appendEvent(messageLf, "");     // append in the room window
+            sg.appendEvent(messageName, "");     // append in the room window
 
         // we loop in reverse order in case we would have to remove a Client
         // because it has disconnected
         for(int i = al.size(); --i >= 0;) {
             ClientThread ct = al.get(i);
-            // try to write to the Client if it fails remove it from the list
-            if(!ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageLf))) {
-                al.remove(i);
-                display("Disconnected Client " + ct.username + " removed from list.", "");
+            if(!ct.username.equals(name)) {
+                // try to write to the Client if it fails remove it from the list
+                if (!ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageName))) {
+                    al.remove(i);
+                    display("Disconnected Client " + ct.username + " removed from list.", "");
+                }
             }
         }
-    }
-
-    public void setEnableSendBut(boolean b){
-        sg.sendBut.setEnabled(b);
     }
 
 }
