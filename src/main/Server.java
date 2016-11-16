@@ -13,9 +13,9 @@ import java.util.*;
  */
 public class Server {
     // a unique ID for each connection
-    public int uniqueId;
+    public static int uniqueId;
     // an ArrayList to keep the list of the Client
-    private ClientThread ct;
+    private ArrayList<ClientThread> al;
     // if I am in a GUI
     private ServerGUI sg;
     // to display time
@@ -44,7 +44,7 @@ public class Server {
         // to display hh:mm:ss
         sdf = new SimpleDateFormat("HH:mm:ss");
         // ArrayList for the Client list
-        //ct = new ClientThread();
+        al = new ArrayList<ClientThread>();
     }
 
     public void start() {
@@ -65,15 +65,24 @@ public class Server {
                 // if I was asked to stop
                 if(!keepGoing)
                     break;
-                ct = new ClientThread(this, socket);  // make a thread of it
-                ct.start();
+                ClientThread t = new ClientThread(this, socket);  // make a thread of it
+                al.add(t);									// save it in the ArrayList
+                t.start();
             }
             // I was asked to stop
             try {
                 serverSocket.close();
-                ct.sInput.close();
-                ct.sOutput.close();
-                ct.socket.close();
+                for(int i = 0; i < al.size(); ++i) {
+                    ClientThread tc = al.get(i);
+                    try {
+                        tc.sInput.close();
+                        tc.sOutput.close();
+                        tc.socket.close();
+                    }
+                    catch(IOException ioE) {
+                        // not much I can do
+                    }
+                }
             }
             catch(Exception e) {
                 display("Exception closing the server and clients: " + e, "");
@@ -112,15 +121,25 @@ public class Server {
     /*
      *  to send a message to all Clients
      */
-    public synchronized void send(String message) {
-        if(ct.isInEG()){
-            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, ct.getEG().cipher(message)));
-        } else if(ct.isInDSA()) {
-            ct.writeMsg(new ChatMessage(ChatMessage.DSASIGN, ct.getDsa().signDSA(message)));
-            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, message));
-        }
-        else {
-            ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, message));
+    private synchronized void broadcast(String message) {
+        // add HH:mm:ss and \n to the message
+        String time = sdf.format(new Date());
+        String messageLf = time + " " + message + "\n";
+        // display message on console or GUI
+        if(sg == null)
+            System.out.print(messageLf);
+        else
+            sg.appendEvent(messageLf, "");     // append in the room window
+
+        // we loop in reverse order in case we would have to remove a Client
+        // because it has disconnected
+        for(int i = al.size(); --i >= 0;) {
+            ClientThread ct = al.get(i);
+            // try to write to the Client if it fails remove it from the list
+            if(!ct.writeMsg(new ChatMessage(ChatMessage.MESSAGE, messageLf))) {
+                al.remove(i);
+                display("Disconnected Client " + ct.username + " removed from list.", "");
+            }
         }
     }
 

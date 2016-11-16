@@ -136,7 +136,7 @@ public class Client {
 
     }
 
-    /*
+    /**
      * a class that waits for the message from the server and append them to the JTextArea
      * if we have a GUI or simply System.out.println() it in console mode
      */
