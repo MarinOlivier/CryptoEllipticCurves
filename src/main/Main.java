@@ -29,23 +29,6 @@ public class Main {
 
         ServerGUI serv = new ServerGUI(1337);
         ClientGUI cli = new ClientGUI("Alice");
-
-		/*Point G = new Point(C, C.getGx(), C.getGy(), false);
-		DSA A = new DSA(C, G, "Alice");
-		DSA B = new DSA(C, G, "Bob");
-
-		String m = "Hello";
-		Point P = A.signDSA(m);
-
-		B.setOtherPub(A.getQ());
-		A.setOtherPub(B.getQ());
-
-		System.out.println(B.verifyDSA(P,m));*/
-
-		//Point P = new Point(C, C.getGx(), C.getGy(), false);
-		//System.out.println("1234 * " + C.getGx() );
-		//System.out.println(P.mult(1234));
-
 	}
 
 }
