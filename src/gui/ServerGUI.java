@@ -95,6 +95,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
                 server.stop();			// ask the server to close the conection
             }
             catch(Exception eClose) {
+
             }
             server = null;
         }
@@ -113,7 +114,7 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
     /*
      * A thread to run the Server
      */
-    class ServerRunning extends Thread {
+    private class ServerRunning extends Thread {
         public void run() {
             server.start();         // should execute until if fails
             // the server failed

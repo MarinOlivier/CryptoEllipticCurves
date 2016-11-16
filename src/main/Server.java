@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class Server {
     // a unique ID for each connection
-    public static int uniqueId;
+    static int uniqueId;
     // an ArrayList to keep the list of the Client
     private ArrayList<ClientThread> al;
     // if I am in a GUI
@@ -44,7 +44,7 @@ public class Server {
         // to display hh:mm:ss
         sdf = new SimpleDateFormat("HH:mm:ss");
         // ArrayList for the Client list
-        al = new ArrayList<ClientThread>();
+        al = new ArrayList<>();
     }
 
     public void start() {
@@ -72,14 +72,12 @@ public class Server {
             // I was asked to stop
             try {
                 serverSocket.close();
-                for(int i = 0; i < al.size(); ++i) {
-                    ClientThread tc = al.get(i);
+                for (ClientThread tc : al) {
                     try {
                         tc.sInput.close();
                         tc.sOutput.close();
                         tc.socket.close();
-                    }
-                    catch(IOException ioE) {
+                    } catch (IOException ioE) {
                         // not much I can do
                     }
                 }
@@ -111,7 +109,7 @@ public class Server {
     /*
      * Display an event (not a message) to the console or the GUI
      */
-    public void display(String msg, String name) {
+    void display(String msg, String name) {
         //String time = sdf.format(new Date()) + " " + msg;
         if(sg == null)
             System.out.println(msg);
@@ -121,7 +119,7 @@ public class Server {
     /*
      *  to send a message to all Clients
      */
-    public synchronized void broadcast(String name, String message) {
+    synchronized void broadcast(String name, String message) {
         // add HH:mm:ss and \n to the message
         String time = sdf.format(new Date());
         String messageName = name + " : " + message + "\n";
@@ -144,5 +142,4 @@ public class Server {
             }
         }
     }
-
 }
