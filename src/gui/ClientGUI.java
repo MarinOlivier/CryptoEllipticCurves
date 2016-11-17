@@ -191,8 +191,9 @@ public class ClientGUI extends JFrame implements ActionListener {
             return;
         }
         if (inEG) {
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, EG.cipher(input.getText())));
-            append(input.getText() + "\n", "Alice : ");
+            System.out.println("username = " + username);
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, EG.cipher(username+"/"+ input.getText())));
+            append(input.getText() + "\n", username + " : ");
             input.setText("");
             return;
         }
@@ -228,32 +229,19 @@ public class ClientGUI extends JFrame implements ActionListener {
     }
 
     private void initElGamal() {
-        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "INIT"));
         append("Starting ElGamal encryption.", "");
-
         EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, username);
-        EG.sendPubKToServ(client);
 
-        EGStartBut.setText("Stop EG");
-        DHStartBut.setEnabled(false);
-        DSABut.setEnabled(false);
-        sendBut.setEnabled(false);
+        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, EG.getPubK()));
+        client.setEGinit(true);
     }
 
     private void stopElGamal() {
-        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, "STOP"));
-
-        append("Stopping ElGamel encryption.", "");
-
-        inEG = false;
-        EGStartBut.setText("Start EG");
-        DHStartBut.setEnabled(true);
-        DSABut.setEnabled(true);
+        client.sendMessage(new ChatMessage(ChatMessage.STOPEG, ""));
     }
 
     private void initDSA() {
         client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "INIT"));
-        //chatBox.append("Sign all message with DSA.\n");
         inDSA = true;
 
         append("All messages will be signed.", "");
@@ -276,5 +264,17 @@ public class ClientGUI extends JFrame implements ActionListener {
         DSABut.setText("Start DSA");
         DHStartBut.setEnabled(true);
         EGStartBut.setEnabled(true);
+    }
+
+    public JButton getDHStartBut() {
+        return DHStartBut;
+    }
+
+    public JButton getEGStartBut() {
+        return EGStartBut;
+    }
+
+    public JButton getDSABut() {
+        return DSABut;
     }
 }

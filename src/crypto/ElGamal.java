@@ -20,30 +20,22 @@ public class ElGamal {
     public Point _pubK;
     private Curve _c;
     public Point otherPubKey;
+    private String _username;
 
     public ElGamal(Point p, Curve c, String s) {
         _G = p;
         _c = c;
         _x = randBigInt(_c.getN());
         _pubK = _G.mult(_x);
-        System.out.println(s + "\n Pub key -> " + _pubK.getX());
+        _username = s;
     }
 
-    public boolean sendPubKToClient(ClientThread thread){
-        String pubK = _pubK.getX().toString()+"|"+_pubK.getY().toString()+"|"+_pubK.isInf();
-        thread.writeMsg(new ChatMessage(ChatMessage.EGPUBK, pubK));
-        return true;
-    }
-
-    public boolean sendPubKToServ(Client client) {
-        String point = _pubK.getX().toString()+"|"+_pubK.getY().toString()+"|"+_pubK.isInf();
-        client.sendMessage(new ChatMessage(ChatMessage.EGPUBK, point));
-        return true;
+    public String getPubK() {
+        return _username + "/" + _pubK.getX() + "|" + _pubK.getY() + "|" + _pubK.isInf();
     }
 
     public void setReceivedPoint(Point receivedPoint, String s) {
         otherPubKey = receivedPoint;
-        System.out.println(s + "\n Recei -> " + otherPubKey.getX());
     }
 
     public String cipher(String m) {
@@ -57,7 +49,6 @@ public class ElGamal {
     }
 
     public String uncipher(String cipher) {
-        System.out.println("cipher = " + cipher);
         String[] tab;
         tab = cipher.split("\\|");
         BigInteger C1 = new BigInteger(tab[0]);

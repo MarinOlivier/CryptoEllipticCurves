@@ -1,6 +1,7 @@
 package main;
 
 import crypto.DiffieHellman;
+import crypto.ElGamal;
 import curves.Point;
 import gui.ClientGUI;
 
@@ -16,6 +17,7 @@ public class Client {
     private ObjectOutputStream sOutput;		// to write on the socket
     private Socket socket;
     private boolean isDHinit;
+    private boolean isEGinit;
 
     // if I use a GUI or not
     private ClientGUI cg;
@@ -44,6 +46,7 @@ public class Client {
         this.port = port;
         this.username = username;
         isDHinit = false;
+        isEGinit = false;
         // save if we are in GUI mode or not
         this.cg = cg;
     }
@@ -152,17 +155,23 @@ public class Client {
                     int type = chtMsg.getType();
                     String msg = chtMsg.getMessage();
                     if(type == ChatMessage.MESSAGE) {
-                        String[] tab = msg.split("/");
-                        String name = tab[0];
-                        msg = tab[1];
-                        String msgName = name + " : " + msg;
-
                         if(cg.inEG){
-                            cg.append(cg.EG.uncipher(msgName), "");
+                            String plain = cg.EG.uncipher(msg);
+                            String[] tab = plain.split("/");
+                            if(tab.length>1) {
+                                String name = tab[0];
+                                msg = tab[1];
+                                String msgName = name + " : " + msg;
+                                cg.append(msgName, "");
+                            }
                         } else if(cg.inDSA){
-                            boolean verified = cg.Dsa.verifyDSA(msgName);
-                            appendSignedMsg(verified, msgName);
+                            boolean verified = cg.Dsa.verifyDSA(msg);
+                            appendSignedMsg(verified, msg);
                         } else {
+                            String[] tab = msg.split("/");
+                            String name = tab[0];
+                            msg = tab[1];
+                            String msgName = name + " : " + msg;
                             cg.append(msgName, "");
                         }
                     }
@@ -174,6 +183,7 @@ public class Client {
                             sendMessage(new ChatMessage(ChatMessage.STARTDH, cg.DH.getPubK()));
                         } else {
                             cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
+                            isDHinit = false;
                         }
                         cg.DH.setSecKey();
                         msg = "Secret key :";
@@ -181,11 +191,32 @@ public class Client {
                         msg += "\n  y = " + cg.DH.getSecKey().getY();
                         cg.append(msg, "");
                     }
-                    if(type == ChatMessage.EGPUBK){
-                        sleep(500);
-                        cg.EG.setReceivedPoint(new Point(Main.C, msg), "Alice");
+                    if(type == ChatMessage.STARTEG) {
+                        msg = msg.split("/")[1];
+                        if(!isEGinit) {
+                            cg.append("Starting ElGamal encryption.", "");
+                            cg.EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C,username);
+                            cg.EG.setReceivedPoint(new Point(Main.C, msg), username);
+                            sendMessage(new ChatMessage(ChatMessage.STARTEG, cg.EG.getPubK()));
+                        } else {
+                            cg.EG.setReceivedPoint(new Point(Main.C, msg), username);
+                            isEGinit = false;
+                        }
+                        cg.getEGStartBut().setText("Stop EG");
+                        cg.getDHStartBut().setEnabled(false);
+                        cg.getDSABut().setEnabled(false);
                         cg.inEG = true;
-                        cg.sendBut.setEnabled(true);
+                    }
+                    if(type == ChatMessage.STOPEG) {
+                        cg.inEG = false;
+                        cg.getDHStartBut().setEnabled(true);
+                        cg.getEGStartBut().setEnabled(true);
+                        cg.getDSABut().setEnabled(true);
+                        cg.getEGStartBut().setText("Start EG");
+                        cg.append("Stopping ElGamel encryption.", "");
+                    }
+                    if(type == ChatMessage.STARTDSA) {
+
                     }
                     if(type == ChatMessage.DSAPUBK) {
                         sleep(500);
@@ -219,5 +250,9 @@ public class Client {
 
     public void setDHinit(boolean DHinit) {
         isDHinit = DHinit;
+    }
+
+    public void setEGinit(boolean EGinit) {
+        isEGinit = EGinit;
     }
 }
