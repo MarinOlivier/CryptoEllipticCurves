@@ -15,6 +15,7 @@ public class Client {
     private ObjectInputStream sInput;		// to read from the socket
     private ObjectOutputStream sOutput;		// to write on the socket
     private Socket socket;
+    private boolean isDHinit;
 
     // if I use a GUI or not
     private ClientGUI cg;
@@ -42,6 +43,7 @@ public class Client {
         this.server = server;
         this.port = port;
         this.username = username;
+        isDHinit = false;
         // save if we are in GUI mode or not
         this.cg = cg;
     }
@@ -166,20 +168,18 @@ public class Client {
                     }
                     if(type == ChatMessage.STARTDH){
                         msg = msg.split("/")[1];
-                        if(cg.DH == null) {
+                        if(!isDHinit) {
                             cg.DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), username);
                             cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
                             sendMessage(new ChatMessage(ChatMessage.STARTDH, cg.DH.getPubK()));
                         } else {
                             cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
                         }
-
                         cg.DH.setSecKey();
                         msg = "Secret key :";
                         msg += "\n  x = " + cg.DH.getSecKey().getX();
                         msg += "\n  y = " + cg.DH.getSecKey().getY();
                         cg.append(msg, "");
-
                     }
                     if(type == ChatMessage.EGPUBK){
                         sleep(500);
@@ -215,5 +215,9 @@ public class Client {
             else
                 cg.append(msg + "\nSignature ERROR.", "");
         }
+    }
+
+    public void setDHinit(boolean DHinit) {
+        isDHinit = DHinit;
     }
 }

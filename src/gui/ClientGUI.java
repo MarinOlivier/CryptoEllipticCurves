@@ -223,6 +223,7 @@ public class ClientGUI extends JFrame implements ActionListener {
         DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), username);
         //client.sendMessage(new ChatMessage(ChatMessage.STARTDH, "INIT"));
         //DH.sendPoint(client);
+        client.setDHinit(true);
         client.sendMessage(new ChatMessage(ChatMessage.STARTDH, DH.getPubK()));
     }
 
