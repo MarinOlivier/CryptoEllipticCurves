@@ -22,12 +22,17 @@ public class DSA {
     private Point _G;
     private Point _otherPub;
     public Point _sign;
+    private String _username;
 
     public DSA(Curve C, Point G, String name) {
         _G = G;
         _C = C;
         _s = randBigInt(C.getN());
         _Q = G.mult(_s);
+    }
+
+    public String getPubK() {
+        return _username + "/" + _Q.getX() + "|" + _Q.getY() + "|" + _Q.isInf();
     }
 
     public boolean sendPubKToClient(ClientThread thread){

@@ -229,7 +229,7 @@ public class ClientGUI extends JFrame implements ActionListener {
     }
 
     private void initElGamal() {
-        append("Starting ElGamal encryption.", "");
+        //append("Starting ElGamal encryption.", "");
         EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, username);
 
         client.sendMessage(new ChatMessage(ChatMessage.STARTEG, EG.getPubK()));
@@ -241,19 +241,20 @@ public class ClientGUI extends JFrame implements ActionListener {
     }
 
     private void initDSA() {
-        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "INIT"));
-        inDSA = true;
-
-        append("All messages will be signed.", "");
-
-        DSABut.setText("Stop DSA");
-        DHStartBut.setEnabled(false);
-        EGStartBut.setEnabled(false);
-
         Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
-        Dsa = new DSA(Main.C, G, "Alice");
+        Dsa = new DSA(Main.C, G, username);
 
-        Dsa.sendPubKToServ(client);
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, Dsa.getPubK()));
+        client.setDSAinit(true);
+        //inDSA = true;
+
+        //append("All messages will be signed.", "");
+
+        //DSABut.setText("Stop DSA");
+        //DHStartBut.setEnabled(false);
+        //EGStartBut.setEnabled(false);
+
+        //Dsa.sendPubKToServ(client);
     }
 
     private void stopDSA() {

@@ -1,5 +1,6 @@
 package main;
 
+import crypto.DSA;
 import crypto.DiffieHellman;
 import crypto.ElGamal;
 import curves.Point;
@@ -18,6 +19,7 @@ public class Client {
     private Socket socket;
     private boolean isDHinit;
     private boolean isEGinit;
+    private boolean isDSAinit;
 
     // if I use a GUI or not
     private ClientGUI cg;
@@ -47,6 +49,7 @@ public class Client {
         this.username = username;
         isDHinit = false;
         isEGinit = false;
+        isDSAinit = false;
         // save if we are in GUI mode or not
         this.cg = cg;
     }
@@ -193,8 +196,8 @@ public class Client {
                     }
                     if(type == ChatMessage.STARTEG) {
                         msg = msg.split("/")[1];
+                        cg.append("Starting ElGamal encryption.", "");
                         if(!isEGinit) {
-                            cg.append("Starting ElGamal encryption.", "");
                             cg.EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C,username);
                             cg.EG.setReceivedPoint(new Point(Main.C, msg), username);
                             sendMessage(new ChatMessage(ChatMessage.STARTEG, cg.EG.getPubK()));
@@ -216,7 +219,20 @@ public class Client {
                         cg.append("Stopping ElGamel encryption.", "");
                     }
                     if(type == ChatMessage.STARTDSA) {
-
+                        cg.append("All messages will be signed.", "");
+                        msg = msg.split("/")[1];
+                        if(!isDSAinit) {
+                            Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
+                            cg.Dsa = new DSA(Main.C, G, username);
+                            sendMessage(new ChatMessage(ChatMessage.STARTDSA, cg.Dsa.getPubK()));
+                        } else {
+                            cg.Dsa.setOtherPub(new Point(Main.C, msg));
+                            isDSAinit = false;
+                        }
+                        cg.getDSABut().setText("Stop DSA");
+                        cg.getDHStartBut().setEnabled(false);
+                        cg.getEGStartBut().setEnabled(false);
+                        cg.inDSA = true;
                     }
                     if(type == ChatMessage.DSAPUBK) {
                         sleep(500);
@@ -254,5 +270,9 @@ public class Client {
 
     public void setEGinit(boolean EGinit) {
         isEGinit = EGinit;
+    }
+
+    public void setDSAinit(boolean DSAinit) {
+        isDSAinit = DSAinit;
     }
 }
