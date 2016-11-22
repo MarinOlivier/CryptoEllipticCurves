@@ -133,6 +133,8 @@ public class ClientGUI extends JFrame implements ActionListener {
 
         msgPane.setBorder(BorderFactory.createEmptyBorder(3, 2, 1, 2));
 
+        System.out.println(name + " " + str);
+
         if (name.equals(username + " : ")) {
             txt.setBorder(brdrRight);
             txt.setBackground(Color.LIGHT_GRAY);
@@ -191,7 +193,6 @@ public class ClientGUI extends JFrame implements ActionListener {
             return;
         }
         if (inEG) {
-            System.out.println("username = " + username);
             client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, EG.cipher(username+"/"+ input.getText())));
             append(input.getText() + "\n", username + " : ");
             input.setText("");
@@ -206,9 +207,9 @@ public class ClientGUI extends JFrame implements ActionListener {
             return;
         }
         if(inDSA){
-            client.sendMessage(new ChatMessage(ChatMessage.DSASIGN, Dsa.signDSA(input.getText())));
+            client.sendMessage(new ChatMessage(ChatMessage.DSASIGN, Dsa.signDSA(username + "/" + input.getText())));
 
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, input.getText()));
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "/" + input.getText()));
             append(input.getText() + "\n", username + " : ");
             input.setText("");
             return;
@@ -232,8 +233,8 @@ public class ClientGUI extends JFrame implements ActionListener {
         //append("Starting ElGamal encryption.", "");
         EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, username);
 
-        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, EG.getPubK()));
         client.setEGinit(true);
+        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, EG.getPubK()));
     }
 
     private void stopElGamal() {
@@ -244,17 +245,8 @@ public class ClientGUI extends JFrame implements ActionListener {
         Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
         Dsa = new DSA(Main.C, G, username);
 
-        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, Dsa.getPubK()));
         client.setDSAinit(true);
-        //inDSA = true;
-
-        //append("All messages will be signed.", "");
-
-        //DSABut.setText("Stop DSA");
-        //DHStartBut.setEnabled(false);
-        //EGStartBut.setEnabled(false);
-
-        //Dsa.sendPubKToServ(client);
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, Dsa.getPubK()));
     }
 
     private void stopDSA() {

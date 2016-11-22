@@ -168,6 +168,7 @@ public class Client {
                                 cg.append(msgName, "");
                             }
                         } else if(cg.inDSA){
+                            // msg = msg +","; <-- Test : sign wouldn't works : PASSED
                             boolean verified = cg.Dsa.verifyDSA(msg);
                             appendSignedMsg(verified, msg);
                         } else {
@@ -224,6 +225,7 @@ public class Client {
                         if(!isDSAinit) {
                             Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
                             cg.Dsa = new DSA(Main.C, G, username);
+                            cg.Dsa.setOtherPub(new Point(Main.C, msg));
                             sendMessage(new ChatMessage(ChatMessage.STARTDSA, cg.Dsa.getPubK()));
                         } else {
                             cg.Dsa.setOtherPub(new Point(Main.C, msg));
@@ -257,10 +259,17 @@ public class Client {
         }
 
         private void appendSignedMsg(boolean verified, String msg) {
+            String[] tab = msg.split("/");
+            String msgName ="";
+            if(tab.length>1) {
+                String name = tab[0];
+                msg = tab[1];
+                msgName = name + " : " + msg;
+            }
             if(verified)
-                cg.append(msg + "\nSignature OK.", "");
+                cg.append(msgName + "\nSignature OK.", "");
             else
-                cg.append(msg + "\nSignature ERROR.", "");
+                cg.append(msgName + "\nSignature ERROR.", "");
         }
     }
 

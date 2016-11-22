@@ -33,8 +33,8 @@ public class Curve {
 
             String sCurrentLine;
             String sCurrentNumber;
-            br = new BufferedReader(new FileReader("/Users/oliviermarin/Documents/Polytech/Info5/CryptoAv/Curves/elliptic_curves/Weierstrass/"+dir+"/"+filename));
-//            br = new BufferedReader(new FileReader("D:\\Documents\\Polytech\\info5\\cryptoAv\\Curves\\elliptic_curves\\Weierstrass\\"+dir+"\\"+filename));
+//            br = new BufferedReader(new FileReader("/Users/oliviermarin/Documents/Polytech/Info5/CryptoAv/Curves/elliptic_curves/Weierstrass/"+dir+"/"+filename));
+            br = new BufferedReader(new FileReader("D:\\Documents\\Polytech\\info5\\cryptoAv\\Curves\\elliptic_curves\\Weierstrass\\"+dir+"\\"+filename));
             int i = 1;
 
             while ((sCurrentLine = br.readLine()) != null) {

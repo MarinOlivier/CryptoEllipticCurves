@@ -25,6 +25,7 @@ public class DSA {
     private String _username;
 
     public DSA(Curve C, Point G, String name) {
+        _username = name;
         _G = G;
         _C = C;
         _s = randBigInt(C.getN());
@@ -32,6 +33,7 @@ public class DSA {
     }
 
     public String getPubK() {
+        System.out.println(_username + " pubK : " + _Q.getX());
         return _username + "/" + _Q.getX() + "|" + _Q.getY() + "|" + _Q.isInf();
     }
 
@@ -74,6 +76,7 @@ public class DSA {
     }
 
     public void setOtherPub(Point _otherPub) {
+        System.out.println(_username + " receive : " + _otherPub.getX());
         this._otherPub = _otherPub;
     }
 
