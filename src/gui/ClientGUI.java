@@ -3,6 +3,7 @@ package gui;
 import crypto.DSA;
 import crypto.DiffieHellman;
 import crypto.ElGamal;
+import crypto.STS;
 import curves.Point;
 import main.ChatMessage;
 import main.Client;
@@ -34,7 +35,7 @@ public class ClientGUI extends JFrame implements ActionListener {
     // if it is for connection
     private boolean connected;
     // the Client object
-    private Client client;
+    public Client client;
     // the default port number
     private int defaultPort;
     private String defaultHost;
@@ -43,10 +44,12 @@ public class ClientGUI extends JFrame implements ActionListener {
     private JButton DHStartBut;
     private JButton EGStartBut;
     private JButton DSABut;
+    private JButton StsBut;
 
     public DiffieHellman DH;
     public ElGamal EG;
     public DSA Dsa;
+    public STS Sts;
     public boolean inEG;
     public boolean inDSA;
     private int widht = 400;
@@ -70,23 +73,27 @@ public class ClientGUI extends JFrame implements ActionListener {
         chatBox = new JPanel(new GridLayout(100000, 1));
 
 
-        JPanel northPane = new JPanel(new GridLayout(1, 3));
+        JPanel northPane = new JPanel(new GridLayout(1, 4));
         DHStartBut = new JButton("Start DH");
         EGStartBut = new JButton("Start EG");
         DSABut = new JButton("Start DSA");
+        StsBut = new JButton("Start STS");
 
         DHStartBut.addActionListener(this);
         EGStartBut.addActionListener(this);
         DSABut.addActionListener(this);
+        StsBut.addActionListener(this);
 
         northPane.add(DHStartBut);
         northPane.add(EGStartBut);
         northPane.add(DSABut);
+        northPane.add(StsBut);
+
         add(northPane, BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new GridLayout(1, 1));
         centerPanel.add(new JScrollPane(chatBox));
-        //chatBox.setEditable(false);
+
         int inputHeight = 75;
         int height = 450;
         centerPanel.setSize(widht, height - inputHeight);
@@ -184,6 +191,10 @@ public class ClientGUI extends JFrame implements ActionListener {
             startDH();
             return;
         }
+        if (o == StsBut) {
+            startSTS();
+            return;
+        }
         if (o == EGStartBut && !inEG) {
             initElGamal();
             return;
@@ -241,12 +252,14 @@ public class ClientGUI extends JFrame implements ActionListener {
         client.sendMessage(new ChatMessage(ChatMessage.STOPEG, ""));
     }
 
-    private void initDSA() {
+    public DSA initDSA() {
         Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
         Dsa = new DSA(Main.C, G, username);
 
         client.setDSAinit(true);
         client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, Dsa.getPubK()));
+
+        return Dsa;
     }
 
     private void stopDSA() {
@@ -257,6 +270,15 @@ public class ClientGUI extends JFrame implements ActionListener {
         DSABut.setText("Start DSA");
         DHStartBut.setEnabled(true);
         EGStartBut.setEnabled(true);
+        StsBut.setEnabled(true);
+    }
+
+    private void startSTS() {
+        Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
+        Sts = new STS(Main.C, G, client, true, username);
+
+        client.setSTSinit(true);
+        client.sendMessage(new ChatMessage(ChatMessage.STSINIT, Sts.getG()));
     }
 
     public JButton getDHStartBut() {
@@ -269,5 +291,9 @@ public class ClientGUI extends JFrame implements ActionListener {
 
     public JButton getDSABut() {
         return DSABut;
+    }
+
+    public JButton getStsBut() {
+        return StsBut;
     }
 }

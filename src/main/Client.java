@@ -3,6 +3,7 @@ package main;
 import crypto.DSA;
 import crypto.DiffieHellman;
 import crypto.ElGamal;
+import crypto.STS;
 import curves.Point;
 import gui.ClientGUI;
 
@@ -20,6 +21,7 @@ public class Client {
     private boolean isDHinit;
     private boolean isEGinit;
     private boolean isDSAinit;
+    private boolean isSTSinit;
 
     // if I use a GUI or not
     private ClientGUI cg;
@@ -209,6 +211,7 @@ public class Client {
                         cg.getEGStartBut().setText("Stop EG");
                         cg.getDHStartBut().setEnabled(false);
                         cg.getDSABut().setEnabled(false);
+                        cg.getStsBut().setEnabled(false);
                         cg.inEG = true;
                     }
                     if(type == ChatMessage.STOPEG) {
@@ -216,11 +219,12 @@ public class Client {
                         cg.getDHStartBut().setEnabled(true);
                         cg.getEGStartBut().setEnabled(true);
                         cg.getDSABut().setEnabled(true);
+                        cg.getStsBut().setEnabled(true);
                         cg.getEGStartBut().setText("Start EG");
                         cg.append("Stopping ElGamel encryption.", "");
                     }
                     if(type == ChatMessage.STARTDSA) {
-                        cg.append("All messages will be signed.", "");
+                        //cg.append("All messages will be signed.", "");
                         msg = msg.split("/")[1];
                         if(!isDSAinit) {
                             Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
@@ -234,6 +238,7 @@ public class Client {
                         cg.getDSABut().setText("Stop DSA");
                         cg.getDHStartBut().setEnabled(false);
                         cg.getEGStartBut().setEnabled(false);
+                        cg.getStsBut().setEnabled(false);
                         cg.inDSA = true;
                     }
                     if(type == ChatMessage.DSAPUBK) {
@@ -242,6 +247,38 @@ public class Client {
                     }
                     if(type == ChatMessage.DSASIGN){
                         cg.Dsa.setSign(msg);
+                    }
+                    if(type == ChatMessage.STSINIT) {
+                        cg.append("Start STS", "");
+                        msg = msg.split("/")[1];
+                        if(!isSTSinit){
+                            Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
+                            cg.Sts = new STS(Main.C, G, cg.client, false, username);
+                            cg.Sts.receiveOtherG(new Point(Main.C, msg));
+                            cg.Sts.calcK();
+                            String sig = cg.Sts.sign();
+                            String enc = cg.Sts.encrypt(cg.Sts.getK(), sig);
+
+                            System.out.println("Sig is : " + sig);
+
+                            sendMessage(new ChatMessage(ChatMessage.STSINIT, cg.Sts.getG()));
+
+                            sendMessage(new ChatMessage(ChatMessage.STSENC, enc));
+
+                        }
+                        else {
+                            cg.Sts.receiveOtherG(new Point(Main.C, msg));
+                            isSTSinit = false;
+                        }
+                        cg.getDHStartBut().setEnabled(false);
+                        cg.getEGStartBut().setEnabled(false);
+                        cg.getDSABut().setEnabled(false);
+                    }
+                    if(type == ChatMessage.STSENC) {
+                        cg.Sts.calcK();
+                        String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
+                        System.out.println("Receive Sig : " + sig);
+
                     }
                 }
                 catch(IOException e) {
@@ -283,5 +320,13 @@ public class Client {
 
     public void setDSAinit(boolean DSAinit) {
         isDSAinit = DSAinit;
+    }
+
+    public void setSTSinit(boolean STSinit) {
+        isSTSinit = STSinit;
+    }
+
+    public ClientGUI getCg() {
+        return cg;
     }
 }
