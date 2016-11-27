@@ -26,7 +26,10 @@ public class Curve {
 	private BigInteger _gy;
 	private BigInteger _r;
 
-	public Curve(String dir, String filename) {
+    public Curve() {
+    }
+
+    public Curve(String dir, String filename) {
         BufferedReader br = null;
 
         try {

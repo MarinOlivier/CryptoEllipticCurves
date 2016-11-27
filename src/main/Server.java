@@ -128,7 +128,8 @@ public class Server {
         // because it has disconnected
         for(int i = al.size(); --i >= 0;) {
             ClientThread ct = al.get(i);
-            if(!ct.username.equals(name)) {
+            //if(!ct.username.equals(name)) {
+            if(!cm.getSrc().equals(ct.username) ) {
                 ct.writeMsg(cm);
             }
         }

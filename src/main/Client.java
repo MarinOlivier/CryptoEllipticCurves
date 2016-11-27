@@ -154,6 +154,7 @@ public class Client {
     class ListenFromServer extends Thread {
 
         public void run() {
+            boolean DSAauthSent = false;
             while(true) {
                 try {
                     ChatMessage chtMsg = (ChatMessage) sInput.readObject();
@@ -184,11 +185,11 @@ public class Client {
                     if(type == ChatMessage.STARTDH){
                         msg = msg.split("/")[1];
                         if(!isDHinit) {
-                            cg.DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), username);
-                            cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
-                            sendMessage(new ChatMessage(ChatMessage.STARTDH, cg.DH.getPubK()));
+                            cg.DH = new DiffieHellman(new Point(cg.getC(), cg.getC().getGx(), cg.getC().getGy(), false), username);
+                            cg.DH.setReceivedPoint(new Point(cg.getC(), msg), username);
+                            sendMessage(new ChatMessage(ChatMessage.STARTDH, cg.DH.getPubK(), cg.client));
                         } else {
-                            cg.DH.setReceivedPoint(new Point(Main.C, msg), username);
+                            cg.DH.setReceivedPoint(new Point(cg.getC(), msg), username);
                             isDHinit = false;
                         }
                         cg.DH.setSecKey();
@@ -201,11 +202,12 @@ public class Client {
                         msg = msg.split("/")[1];
                         cg.append("Starting ElGamal encryption.", "");
                         if(!isEGinit) {
-                            cg.EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C,username);
-                            cg.EG.setReceivedPoint(new Point(Main.C, msg), username);
-                            sendMessage(new ChatMessage(ChatMessage.STARTEG, cg.EG.getPubK()));
+                            Point P = new Point(cg.getC(), cg.getC().getGx(), cg.getC().getGy(), false);
+                            cg.EG = new ElGamal(P, cg.getC(),username, cg.getPrivK(), cg.getPubK());
+                            cg.EG.setReceivedPoint(new Point(cg.getC(), msg), username);
+                            sendMessage(new ChatMessage(ChatMessage.STARTEG, cg.EG.getPubK(), cg.client));
                         } else {
-                            cg.EG.setReceivedPoint(new Point(Main.C, msg), username);
+                            cg.EG.setReceivedPoint(new Point(cg.getC(), msg), username);
                             isEGinit = false;
                         }
                         cg.getEGStartBut().setText("Stop EG");
@@ -227,12 +229,12 @@ public class Client {
                         //cg.append("All messages will be signed.", "");
                         msg = msg.split("/")[1];
                         if(!isDSAinit) {
-                            Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
-                            cg.Dsa = new DSA(Main.C, G, username);
-                            cg.Dsa.setOtherPub(new Point(Main.C, msg));
-                            sendMessage(new ChatMessage(ChatMessage.STARTDSA, cg.Dsa.getPubK()));
+                            Point G = new Point(cg.getC(), cg.getC().getGx(), cg.getC().getGy(), false);
+                            cg.Dsa = new DSA(cg.getC(), G, username, cg.getPrivK(), cg.getPubK());
+                            cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
+                            sendMessage(new ChatMessage(ChatMessage.STARTDSA, cg.Dsa.getPubK(), cg.client));
                         } else {
-                            cg.Dsa.setOtherPub(new Point(Main.C, msg));
+                            cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
                             isDSAinit = false;
                         }
                         cg.getDSABut().setText("Stop DSA");
@@ -243,42 +245,52 @@ public class Client {
                     }
                     if(type == ChatMessage.DSAPUBK) {
                         sleep(500);
-                        cg.Dsa.setOtherPub(new Point(Main.C, msg));
+                        cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
                     }
                     if(type == ChatMessage.DSASIGN){
                         cg.Dsa.setSign(msg);
                     }
                     if(type == ChatMessage.STSINIT) {
-                        cg.append("Start STS", "");
+                        cg.append(username + " start STS", "");
                         msg = msg.split("/")[1];
                         if(!isSTSinit){
-                            Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
-                            cg.Sts = new STS(Main.C, G, cg.client, false, username);
-                            cg.Sts.receiveOtherG(new Point(Main.C, msg));
+                            Point G = new Point(cg.getC(), cg.getC().getGx(), cg.getC().getGy(), false);
+                            cg.Sts = new STS(cg.getC(), G, cg.client, false, username);
+                            cg.Sts.receiveOtherG(new Point(cg.getC(), msg));
                             cg.Sts.calcK();
                             String sig = cg.Sts.sign();
                             String enc = cg.Sts.encrypt(cg.Sts.getK(), sig);
 
-                            System.out.println("Sig is : " + sig);
+                            System.out.println(username + " : proceed to auth myself.");
 
-                            sendMessage(new ChatMessage(ChatMessage.STSINIT, cg.Sts.getG()));
-
-                            sendMessage(new ChatMessage(ChatMessage.STSENC, enc));
+                            sendMessage(new ChatMessage(ChatMessage.STSINIT, cg.Sts.getG(), cg.client));
+                            sendMessage(new ChatMessage(ChatMessage.STSENC, enc, cg.client));
 
                         }
                         else {
-                            cg.Sts.receiveOtherG(new Point(Main.C, msg));
-                            isSTSinit = false;
+                            cg.Sts.receiveOtherG(new Point(cg.getC(), msg));
+                            cg.Sts.calcK();
                         }
                         cg.getDHStartBut().setEnabled(false);
                         cg.getEGStartBut().setEnabled(false);
                         cg.getDSABut().setEnabled(false);
                     }
                     if(type == ChatMessage.STSENC) {
-                        cg.Sts.calcK();
-                        String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
-                        System.out.println("Receive Sig : " + sig);
+                        if(isSTSinit) {
+                            String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
 
+                            if (cg.Sts.verify(sig)) {
+                                System.out.println(username + " : other is auth. :)");
+                                System.out.println(username + " : proceed to auth myself.");
+
+                                sig = cg.Sts.sign();
+                                String enc = cg.Sts.encrypt(cg.Sts.getK(), sig);
+                                sendMessage(new ChatMessage(ChatMessage.STSENC, enc, cg.client));
+                            }
+                        } else {
+                            String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
+                            System.out.println(username + " : " + cg.Sts.verify(sig));
+                        }
                     }
                 }
                 catch(IOException e) {
@@ -328,5 +340,25 @@ public class Client {
 
     public ClientGUI getCg() {
         return cg;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Client client = (Client) o;
+
+        return username.equals(client.username);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
+
+    public String getUsername() {
+        return username;
     }
 }

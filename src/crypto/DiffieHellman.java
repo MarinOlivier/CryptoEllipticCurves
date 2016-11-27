@@ -1,10 +1,10 @@
 package crypto;
 
+import curves.Curve;
 import curves.Point;
 import main.ChatMessage;
 import main.*;
 
-import static main.Main.C;
 import static math.MathBigInt.*;
 
 import java.math.BigInteger;
@@ -19,11 +19,13 @@ public class DiffieHellman {
     private Point _receivedPoint;
     private Point _secKey;
     private String _username;
+    private Curve _c;
 
     public DiffieHellman(Point P, String s) {
         _username = s;
-        _rand = randBigInt(C.getP());
         _P = new Point(P);
+        _c = _P.getCurve();
+        _rand = randBigInt(_c.getP());
 
         _calculatedPoint = _P.mult(_rand);
         System.out.println(s + "\n  Calc : " + _calculatedPoint.getX());

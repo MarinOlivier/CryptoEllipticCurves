@@ -8,7 +8,6 @@ import main.ClientThread;
 
 import java.math.BigInteger;
 
-import static main.Main.C;
 import static math.MathBigInt.*;
 
 /**
@@ -22,11 +21,11 @@ public class ElGamal {
     public Point otherPubKey;
     private String _username;
 
-    public ElGamal(Point p, Curve c, String s) {
+    public ElGamal(Point p, Curve c, String s, BigInteger privK, Point pubK) {
         _G = p;
         _c = c;
-        _x = randBigInt(_c.getN());
-        _pubK = _G.mult(_x);
+        _x = privK;
+        _pubK = pubK;
         _username = s;
     }
 
@@ -42,7 +41,7 @@ public class ElGamal {
         BigInteger k = randBigInt(_c.getN());
         Point C1 = otherPubKey.mult(k);
 
-        BigInteger C1x = (toBigInteger(m).add(C1.getX())).mod(C.getP());
+        BigInteger C1x = (toBigInteger(m).add(C1.getX())).mod(_c.getP());
         Point C2 = _G.mult(k);
 
         return C1x + "|" + C2.getX() + "|" + C2.getY();
@@ -55,9 +54,9 @@ public class ElGamal {
         BigInteger C2x = new BigInteger(tab[1]);
         BigInteger C2y = new BigInteger(tab[2]);
 
-        Point C2 = new Point(C, C2x, C2y, false);
+        Point C2 = new Point(_c, C2x, C2y, false);
 
-        return fromBigInteger((C1.subtract(C2.mult(_x).getX())).mod(C.getP()));
+        return fromBigInteger((C1.subtract(C2.mult(_x).getX())).mod(_c.getP()));
     }
 
 }

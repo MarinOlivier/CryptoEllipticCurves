@@ -24,29 +24,16 @@ public class DSA {
     public Point _sign;
     private String _username;
 
-    public DSA(Curve C, Point G, String name) {
+    public DSA(Curve C, Point G, String name, BigInteger privK, Point pubK) {
         _username = name;
         _G = G;
         _C = C;
-        _s = randBigInt(C.getN());
-        _Q = G.mult(_s);
+        _s = privK;
+        _Q = pubK;
     }
 
     public String getPubK() {
-        System.out.println(_username + " pubK : " + _Q.getX());
         return _username + "/" + _Q.getX() + "|" + _Q.getY() + "|" + _Q.isInf();
-    }
-
-    public boolean sendPubKToClient(ClientThread thread){
-        String pubK = _Q.getX().toString()+"|"+_Q.getY().toString()+"|"+_Q.isInf();
-        thread.writeMsg(new ChatMessage(ChatMessage.DSAPUBK, pubK));
-        return true;
-    }
-
-    public boolean sendPubKToServ(Client client) {
-        String point = _Q.getX().toString()+"|"+_Q.getY().toString()+"|"+_Q.isInf();
-        client.sendMessage(new ChatMessage(ChatMessage.DSAPUBK, point));
-        return true;
     }
 
     public String signDSA(String m) {
@@ -76,7 +63,6 @@ public class DSA {
     }
 
     public void setOtherPub(Point _otherPub) {
-        System.out.println(_username + " receive : " + _otherPub.getX());
         this._otherPub = _otherPub;
     }
 
@@ -89,6 +75,6 @@ public class DSA {
         tab = s.split("\\|");
         BigInteger x = new BigInteger(tab[0]);
         BigInteger y = new BigInteger(tab[1]);
-        _sign = new Point(Main.C, x, y, false);
+        _sign = new Point(_C, x, y, false);
     }
 }

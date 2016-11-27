@@ -4,6 +4,7 @@ import crypto.DSA;
 import crypto.DiffieHellman;
 import crypto.ElGamal;
 import crypto.STS;
+import curves.Curve;
 import curves.Point;
 import main.ChatMessage;
 import main.Client;
@@ -13,8 +14,14 @@ import javax.swing.*;
 import javax.swing.border.AbstractBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.math.BigInteger;
 
 import static java.lang.Thread.sleep;
+import static math.MathBigInt.randBigInt;
 
 
 /**
@@ -38,6 +45,9 @@ public class ClientGUI extends JFrame implements ActionListener {
     public Client client;
     // the default port number
     private int defaultPort;
+
+    private Curve C;
+
     private String defaultHost;
     private String username;
 
@@ -54,12 +64,15 @@ public class ClientGUI extends JFrame implements ActionListener {
     public boolean inDSA;
     private int widht = 400;
 
+    private BigInteger privK;
+    public Point pubK;
+
     // Constructor connection receiving a socket number
-    public ClientGUI(String username) {
+    public ClientGUI(String username, int port) {
         super("Chat Client " + username);
 
         this.username = username;
-        defaultPort = 1337;
+        defaultPort = port;
         defaultHost = "localhost";
         inEG = false;
         inDSA = false;
@@ -171,6 +184,88 @@ public class ClientGUI extends JFrame implements ActionListener {
         if (username.length() == 0)
             return;
 
+        File f = new File("/Users/oliviermarin/Documents/Polytech/Info5/CryptoAv/.curve/"+username+".k");
+        privK = BigInteger.ZERO;
+
+        if(f.exists()) {
+            // read param in file
+            BufferedReader br = null;
+            C = new Curve();
+            try {
+
+                String sCurrentLine;
+                String sCurrentNumber;
+                br = new BufferedReader(new FileReader(f));
+                int i = 1;
+
+                while ((sCurrentLine = br.readLine()) != null) {
+                    sCurrentNumber = sCurrentLine.substring(sCurrentLine.lastIndexOf("=")+1);
+                    switch (i){
+                        case 1:
+                            C.setP(new BigInteger(sCurrentNumber));
+                            break;
+                        case 2:
+                            C.setN(new BigInteger(sCurrentNumber));
+                            break;
+                        case 3:
+                            C.setA4(new BigInteger(sCurrentNumber));
+                            break;
+                        case 4:
+                            C.setA6(new BigInteger(sCurrentNumber));
+                            break;
+                        case 5:
+                            C.setR4(new BigInteger(sCurrentNumber));
+                            break;
+                        case 6:
+                            C.setR6(new BigInteger(sCurrentNumber));
+                            break;
+                        case 7:
+                            C.setGx(new BigInteger(sCurrentNumber));
+                            break;
+                        case 8:
+                            C.setGy(new BigInteger(sCurrentNumber));
+                            break;
+                        case 9:
+                            C.setR(new BigInteger(sCurrentNumber));
+                            break;
+                        case 10:
+                            privK = new BigInteger((sCurrentNumber));
+                    }
+                    i++;
+                }
+                Point G = new Point(C, C.getGx(), C.getGy(), false);
+                pubK = G.mult(privK);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            try{
+
+                C = new Curve("cw256", "w256-001.gp");
+
+                PrintWriter writer = new PrintWriter(f, "UTF-8");
+                writer.println("p="+C.getP());
+                writer.println("n="+C.getN());
+                writer.println("a4="+C.getA4());
+                writer.println("a6="+C.getA6());
+                writer.println("r4="+C.getR4());
+                writer.println("r6="+C.getR6());
+                writer.println("gx="+C.getGx());
+                writer.println("gy="+C.getGy());
+                writer.println("r="+C.getR());
+
+                privK = randBigInt(C.getN());
+                writer.println("priv="+privK);
+
+                Point G = new Point(C, C.getGx(), C.getGy(), false);
+                pubK = G.mult(privK);
+
+                writer.close();
+            } catch (Exception e) {
+                // do something
+            }
+        }
         // try creating a new Client with GUI
         client = new Client(defaultHost, defaultPort, username, this);
         // test if we can start the Client
@@ -204,7 +299,8 @@ public class ClientGUI extends JFrame implements ActionListener {
             return;
         }
         if (inEG) {
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, EG.cipher(username+"/"+ input.getText())));
+            System.out.println(username + " : " + EG.cipher(input.getText()));
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, EG.cipher(username+"/"+ input.getText()), client));
             append(input.getText() + "\n", username + " : ");
             input.setText("");
             return;
@@ -218,52 +314,53 @@ public class ClientGUI extends JFrame implements ActionListener {
             return;
         }
         if(inDSA){
-            client.sendMessage(new ChatMessage(ChatMessage.DSASIGN, Dsa.signDSA(username + "/" + input.getText())));
+            client.sendMessage(new ChatMessage(ChatMessage.DSASIGN, Dsa.signDSA(username + "/" + input.getText()), client));
 
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "/" + input.getText()));
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "/" + input.getText(), client));
             append(input.getText() + "\n", username + " : ");
             input.setText("");
             return;
         }
         if (connected) {
-            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "/" + input.getText()));
+            client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, username + "/" + input.getText(), client));
             append(input.getText() + "\n", username + " : ");
             input.setText("");
         }
     }
 
     private void startDH() {
-        DH = new DiffieHellman(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), username);
+        DH = new DiffieHellman(new Point(C, C.getGx(), C.getGy(), false), username);
         //client.sendMessage(new ChatMessage(ChatMessage.STARTDH, "INIT"));
         //DH.sendPoint(client);
         client.setDHinit(true);
-        client.sendMessage(new ChatMessage(ChatMessage.STARTDH, DH.getPubK()));
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDH, DH.getPubK(), client));
     }
 
     private void initElGamal() {
         //append("Starting ElGamal encryption.", "");
-        EG = new ElGamal(new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false), Main.C, username);
+        Point P = new Point(C, C.getGx(), C.getGy(), false);
+        EG = new ElGamal(P, C, username, privK, pubK);
 
         client.setEGinit(true);
-        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, EG.getPubK()));
+        client.sendMessage(new ChatMessage(ChatMessage.STARTEG, EG.getPubK(), client));
     }
 
     private void stopElGamal() {
-        client.sendMessage(new ChatMessage(ChatMessage.STOPEG, ""));
+        client.sendMessage(new ChatMessage(ChatMessage.STOPEG, "", client));
     }
 
     public DSA initDSA() {
-        Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
-        Dsa = new DSA(Main.C, G, username);
+        Point G = new Point(C, C.getGx(), C.getGy(), false);
+        Dsa = new DSA(C, G, username, privK, pubK);
 
         client.setDSAinit(true);
-        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, Dsa.getPubK()));
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, Dsa.getPubK(), client));
 
         return Dsa;
     }
 
     private void stopDSA() {
-        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "STOP"));
+        client.sendMessage(new ChatMessage(ChatMessage.STARTDSA, "STOP", client));
         //chatBox.append("Stop DSA.\n");
 
         inDSA = false;
@@ -274,11 +371,15 @@ public class ClientGUI extends JFrame implements ActionListener {
     }
 
     private void startSTS() {
-        Point G = new Point(Main.C, Main.C.getGx(), Main.C.getGy(), false);
-        Sts = new STS(Main.C, G, client, true, username);
+        Point G = new Point(C, C.getGx(), C.getGy(), false);
+        Sts = new STS(C, G, client, true, username);
 
         client.setSTSinit(true);
-        client.sendMessage(new ChatMessage(ChatMessage.STSINIT, Sts.getG()));
+        client.sendMessage(new ChatMessage(ChatMessage.STSINIT, Sts.getG(), client));
+    }
+
+    public Curve getC() {
+        return C;
     }
 
     public JButton getDHStartBut() {
@@ -295,5 +396,13 @@ public class ClientGUI extends JFrame implements ActionListener {
 
     public JButton getStsBut() {
         return StsBut;
+    }
+
+    public BigInteger getPrivK() {
+        return privK;
+    }
+
+    public Point getPubK() {
+        return pubK;
     }
 }

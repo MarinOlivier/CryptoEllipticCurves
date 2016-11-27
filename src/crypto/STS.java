@@ -2,19 +2,19 @@ package crypto;
 
 import curves.Curve;
 import curves.Point;
-import main.ChatMessage;
 import main.Client;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
-import java.util.Base64;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
-
+import java.security.SecureRandom;
 
 import static java.lang.Thread.sleep;
 import static math.MathBigInt.fromBigInteger;
 import static math.MathBigInt.randBigInt;
+import static math.MathBigInt.toBigInteger;
 
 /**
  * Created by oliviermarin on 23/11/2016.
@@ -31,7 +31,6 @@ public class STS {
     private Point _G;
     private Point _xG;
     private Point _otherG;
-    private BigInteger _iv;
 
     private Point _k;
 
@@ -59,7 +58,6 @@ public class STS {
         _G = G;
         _x = randBigInt(C.getN());
         _xG = _G.mult(_x);
-        _iv = randBigInt(C.getN());
     }
 
     public String getG() {
@@ -85,21 +83,33 @@ public class STS {
         return _DSA.signDSA(msg);
     }
 
+    public boolean verify(String sig) {
+        _DSA.setSign(sig);
+        String msg = _otherG.getX() + "|" + _otherG.getY() + "|" + _otherG.isInf();
+        msg += "!";
+        msg += _xG.getX() + "|" + _xG.getY() + "|" + _xG.isInf();
+        return _DSA.verifyDSA(msg);
+    }
+
     public String encrypt(String key, String value) {
-        String initVector = fromBigInteger(_iv);
+        SecureRandom rand = new SecureRandom();
+        String initVector = new BigInteger(128, rand).toString();
+        initVector = initVector.substring(0, 16);
+
         try {
-            key = key.substring(0, 16);
-            initVector.substring(0, 16);
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"), 0, 16);
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), 0, 16, "AES");
+            key = key.substring(0, 32);
+
+            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
 
             byte[] encrypted = cipher.doFinal(value.getBytes());
-            System.out.println("encrypted string: " + Base64.getEncoder().encodeToString(encrypted));
 
-            return Base64.getEncoder().encodeToString(encrypted);
+            return initVector + "|" + Base64.encodeBase64String(encrypted);
+            //return _iv + "|" + encrypted;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -109,15 +119,20 @@ public class STS {
     }
 
     public String decrypt(String key, String encrypted) {
-        String initVector = fromBigInteger(_iv);
+        //_iv = toBigInteger(encrypted.split("\\|")[0]);
+        String initVector = encrypted.split("\\|")[0];
+        encrypted = encrypted.split("\\|")[1];
         try {
-            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"), 0, 16);
-            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), 0, 16, "AES");
+            key = key.substring(0, 32);
+            //initVector.substring(0, 32);
+            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
 
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
 
-            byte[] original = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+            byte[] original = cipher.doFinal(Base64.decodeBase64(encrypted));
+            //byte[] original = cipher.doFinal(encrypted.getBytes());
 
             return new String(original);
         } catch (Exception ex) {
