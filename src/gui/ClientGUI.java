@@ -266,6 +266,11 @@ public class ClientGUI extends JFrame implements ActionListener {
                 // do something
             }
         }
+
+        System.out.println(username);
+        System.out.println("\tPublic key x = " + pubK.getX());
+        System.out.println("\tPublic key y = " + pubK.getY());
+        System.out.println("\tPrivate key = " + privK);
         // try creating a new Client with GUI
         client = new Client(defaultHost, defaultPort, username, this);
         // test if we can start the Client
@@ -347,6 +352,13 @@ public class ClientGUI extends JFrame implements ActionListener {
 
     private void stopElGamal() {
         client.sendMessage(new ChatMessage(ChatMessage.STOPEG, "", client));
+        inEG = false;
+        DHStartBut.setEnabled(true);
+        EGStartBut.setEnabled(true);
+        DSABut.setEnabled(true);
+        StsBut.setEnabled(true);
+        EGStartBut.setText("Start EG");
+        append("Stopping ElGamal encryption", "");
     }
 
     public DSA initDSA() {

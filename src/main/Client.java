@@ -223,25 +223,33 @@ public class Client {
                         cg.getDSABut().setEnabled(true);
                         cg.getStsBut().setEnabled(true);
                         cg.getEGStartBut().setText("Start EG");
-                        cg.append("Stopping ElGamel encryption.", "");
+                        cg.append("Stopping ElGamal encryption.", "");
                     }
                     if(type == ChatMessage.STARTDSA) {
                         //cg.append("All messages will be signed.", "");
-                        msg = msg.split("/")[1];
-                        if(!isDSAinit) {
-                            Point G = new Point(cg.getC(), cg.getC().getGx(), cg.getC().getGy(), false);
-                            cg.Dsa = new DSA(cg.getC(), G, username, cg.getPrivK(), cg.getPubK());
-                            cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
-                            sendMessage(new ChatMessage(ChatMessage.STARTDSA, cg.Dsa.getPubK(), cg.client));
+                        if (msg.equals("STOP")) {
+                            cg.inDSA = false;
+                            cg.getDSABut().setText("Start DSA");
+                            cg.getDHStartBut().setEnabled(true);
+                            cg.getEGStartBut().setEnabled(true);
+                            cg.getStsBut().setEnabled(true);
                         } else {
-                            cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
-                            isDSAinit = false;
+                            msg = msg.split("/")[1];
+                            if (!isDSAinit) {
+                                Point G = new Point(cg.getC(), cg.getC().getGx(), cg.getC().getGy(), false);
+                                cg.Dsa = new DSA(cg.getC(), G, username, cg.getPrivK(), cg.getPubK());
+                                cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
+                                sendMessage(new ChatMessage(ChatMessage.STARTDSA, cg.Dsa.getPubK(), cg.client));
+                            } else {
+                                cg.Dsa.setOtherPub(new Point(cg.getC(), msg));
+                                isDSAinit = false;
+                            }
+                            cg.getDSABut().setText("Stop DSA");
+                            cg.getDHStartBut().setEnabled(false);
+                            cg.getEGStartBut().setEnabled(false);
+                            cg.getStsBut().setEnabled(false);
+                            cg.inDSA = true;
                         }
-                        cg.getDSABut().setText("Stop DSA");
-                        cg.getDHStartBut().setEnabled(false);
-                        cg.getEGStartBut().setEnabled(false);
-                        cg.getStsBut().setEnabled(false);
-                        cg.inDSA = true;
                     }
                     if(type == ChatMessage.DSAPUBK) {
                         sleep(500);
@@ -276,20 +284,22 @@ public class Client {
                         cg.getDSABut().setEnabled(false);
                     }
                     if(type == ChatMessage.STSENC) {
+                        String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
+
+                        if (cg.Sts.verify(sig)) {
+                            System.out.println(username + " : other is auth. :)");
+                            String summary = "Signature OK.\n";
+                            summary += "Shared secret is :\n";
+                            summary += "x = " + cg.Sts.getKPoint().getX() + "\n";
+                            summary += "y = " + cg.Sts.getKPoint().getY() + "\n";
+
+                            cg.append(username + " : " + summary, "");
+                        }
                         if(isSTSinit) {
-                            String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
-
-                            if (cg.Sts.verify(sig)) {
-                                System.out.println(username + " : other is auth. :)");
-                                System.out.println(username + " : proceed to auth myself.");
-
-                                sig = cg.Sts.sign();
-                                String enc = cg.Sts.encrypt(cg.Sts.getK(), sig);
-                                sendMessage(new ChatMessage(ChatMessage.STSENC, enc, cg.client));
-                            }
-                        } else {
-                            String sig = cg.Sts.decrypt(cg.Sts.getK(), msg);
-                            System.out.println(username + " : " + cg.Sts.verify(sig));
+                            System.out.println(username + " : proceed to auth myself.");
+                            sig = cg.Sts.sign();
+                            String enc = cg.Sts.encrypt(cg.Sts.getK(), sig);
+                            sendMessage(new ChatMessage(ChatMessage.STSENC, enc, cg.client));
                         }
                     }
                 }

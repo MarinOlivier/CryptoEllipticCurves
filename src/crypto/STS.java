@@ -72,6 +72,10 @@ public class STS {
         return _k.getX() + "|" + _k.getY() + "|" + _k.isInf();
     }
 
+    public Point getKPoint() {
+        return _k;
+    }
+
     public void receiveOtherG(Point P) {
         _otherG = P;
     }
